@@ -1,0 +1,14 @@
+const server = require('../server.js');
+const https = require('https');
+const fs = require('fs');
+
+const key = fs.readFileSync('./localhost-key.pem');
+const cert = fs.readFileSync('./localhost.pem');
+
+
+const port = process.env.PORT || 3000;
+server.set('port', port);
+
+const httpsServer = https.createServer({key, cert}, server);
+
+httpsServer.listen(port, () => console.log(`listening on port ${ port }`));
