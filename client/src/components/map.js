@@ -53,7 +53,6 @@ class Map extends Component {
     this.olmap.getView().setCenter(this.state.center);
     this.olmap.getView().setZoom(this.state.zoom);
     console.log(this.olmap.getView().calculateExtent(this.olmap.getSize()));
-
   } 
 
 
@@ -62,13 +61,35 @@ class Map extends Component {
 
     // Listen to map changes
     this.olmap.on("moveend", () => {
+      console.log('moved')
       let center = this.olmap.getView().getCenter();
       let zoom = this.olmap.getView().getZoom();
       this.setState({ center, zoom });
     });
+    console.log('component did mount:',this.props.searchCoordinates)
   }
 
+  componentDidUpdate(nextProps, prevState) {
+    console.log('component did update',this.props.searchCoordinates);
+    if (this.props.searchCoordinates !== nextProps.searchCoordinates) {
+      console.log('changed')
+      this.setState(
+        {center: fromLonLat([this.props.searchCoordinates.longitude,this.props.searchCoordinates.latitude]), 
+          zoom : 14}
+      )
+      this.props.mapUpdatedChange();
+    }
+    /**this.setState(
+      {center: fromLonLat([this.props.longitude,this.props.latitude]), 
+        zoom : 14}
+    );*/
+  }
+  
+  //everytime olmap changes view
   shouldComponentUpdate(nextProps, nextState) {
+    console.log('should comp update',this.props.searchCoordinates);
+    console.log('needToChange', this.props.needToChange)
+    if (this.props.needToChange) return true;
     let center = this.olmap.getView().getCenter();
     let zoom = this.olmap.getView().getZoom();
     if (center === nextState.center && zoom === nextState.zoom) return false;

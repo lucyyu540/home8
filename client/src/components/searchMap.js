@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment , useEffect} from "react";
 import { makeStyles, createStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import InputBase from '@material-ui/core/InputBase';
@@ -41,29 +41,41 @@ const useStyles = makeStyles((theme) =>
     },
   }),
 );
-function handleSearch(e) {
-
-
-}
 
 
 Geocode.setApiKey(config.GOOGLE_API_KEY);
 Geocode.setLanguage("en");
 Geocode.enableDebug();
 
-Geocode.fromLatLng("48.8583701", "2.2922926").then(
-  response => {
-    const address = response.results[0].formatted_address;
-    console.log(address);
-  },
-  error => {
-    console.error(error);
-  }
-);
 
 export default function CustomizedInputBase() {
   const classes = useStyles();
-
+  const [searchInput, setSearchInput] = React.useState("");
+  const [searchCoordinates, setSearchCoordinates] = React.useState(null);
+  const [needToChange, setNeedToChange] = React.useState(false);
+  function mapUpdatedChange() {
+    setNeedToChange(false);
+  }
+  /**HANDLE FUNCTIONS */
+  function handleSearchInput(e) {
+    setSearchInput(e.target.value);
+  }
+  function handleSearchClick(e) {
+    if (searchInput === "") return;
+    Geocode.fromAddress(searchInput).then(
+      response => {
+        const { lat, lng } = response.results[0].geometry.location;
+        setNeedToChange(true);
+        setSearchCoordinates({longitude : lng, latitude: lat});
+      },
+      error => {
+        console.error(error);
+      }
+    );
+  }
+  /**console.log('longs and lat retrieved from search area: ')
+  console.log(longitude);
+  console.log(latitude);*/
   return (
     <div className={classes.root}>
 
@@ -78,12 +90,13 @@ export default function CustomizedInputBase() {
         className={classes.input}
         placeholder="Search area"
         inputProps={{ 'aria-label': 'search map' }}
+        onChange={handleSearchInput}
       />
       <IconButton 
-      type="submit" 
+      //type="submit" 
       className={classes.iconButton} 
       aria-label="search"
-      onClick={handleSearch}
+      onClick={handleSearchClick}
       >
         <SearchIcon />
       </IconButton>
@@ -95,7 +108,7 @@ export default function CustomizedInputBase() {
     </Paper>
 
     {/**MAP */}
-    <Map />
+    <Map needToChange={needToChange} searchCoordinates={searchCoordinates} mapUpdatedChange={mapUpdatedChange}/>
     </div>
   );
 }
