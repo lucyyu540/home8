@@ -49,72 +49,36 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function BottomAppBar() {
+export default function ListingResults(props) {
   const classes = useStyles();
-  /**const [showResult, setShowResult] = React.useState(false);
-  const [apiMessage, setApiMessage] = React.useState("");
-  const { getTokenSilently } = useAuth0();
-  const callPrivateAPI = async (email) => {
-    try {
-      console.log('trying /private with email: ', email);
-      const data = {email: email}
-      const token = await getTokenSilently();
-      const response = await fetch("https://localhost:3000/private", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }, 
-        method: 'put', 
-        body: JSON.stringify(data)
-      });
-      const responseData = await response.json();
-      setShowResult(true);
-      setApiMessage(responseData);
-      console.log('logged in');
-      console.log(responseData);
-
-    } catch (error) {
-      console.log(error)
-    }
-  };
-  const callPublicAPI = async () => {
-    try {
-      const response = await fetch("https://localhost:3000/")
-      const responseData = await response.json();
-      setShowResult(true);
-      setApiMessage(responseData);
-    }
-    catch(err) {
-      console.log(err);
-    }
-  }
- 
-  const {user} = useAuth0();
-
-  useEffect( ()=> {
-  if (user) {
-   callPrivateAPI(user.email);
-  }
-  else {
-    console.log('not logged on)')
-    callPublicAPI();
-  } 
-  }, [showResult] )*/
+  var listings = props.listings;
+  var favoriteListings = [];
+  if (!listings) listings = [];
 
   return (
     <React.Fragment>
       <CssBaseline />
       <Paper square className={classes.paper}>
         <List className={classes.list}>
-          {messages.map(({ id, primary, secondary }) => (
-            <React.Fragment key={id}>
-              {id === 1 && <ListSubheader className={classes.subheader}>Favorited</ListSubheader>}
-              {id === 3 && <ListSubheader className={classes.subheader}>Most Recent</ListSubheader>}
+        {favoriteListings.map(({ lid, address, owner }) => (
+            <React.Fragment key={lid}>
+              <ListSubheader className={classes.subheader}>Favorited</ListSubheader>
               <ListItem button>
                 <ListItemAvatar>
                   <Avatar alt="Profile Picture" />
                 </ListItemAvatar>
-                <ListItemText primary={primary} secondary={secondary} />
+                <ListItemText primary={address} secondary={owner[1]} />
+              </ListItem>
+            </React.Fragment>
+          ))}
+          {listings.map(({ lid, address, owner }) => (
+            <React.Fragment key={lid}>
+              <ListSubheader className={classes.subheader}>Recent</ListSubheader>
+              <ListItem button>
+                <ListItemAvatar>
+                  <Avatar alt="Profile Picture" />
+                </ListItemAvatar>
+                <ListItemText primary={address} secondary={owner[1]} />
               </ListItem>
             </React.Fragment>
           ))}

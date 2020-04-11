@@ -11,6 +11,19 @@ db.updateUserByUserid = (firstName, lastName, dob, phone, nationality, gender, g
     })
 
 }
+db.getUsernameByUserid = (userid) => {
+    console.log('searching username with id: ', userid);
+    return new Promise((res, rej) => {
+        sql.query('SELECT username FROM users WHERE userid = ?',[userid], (err, results) => {
+            if (err) return rej(err);
+            if (results.length > 0) {
+                return res(results[0].username);//exists
+            }
+            return rej(err);
+        });
+    });
+}
+
 db.getUserByUserid = (userid) => {
     return new Promise((res, rej) => {
         sql.query('SELECT * FROM users WHERE userid = ?',[userid], (err, results) => {

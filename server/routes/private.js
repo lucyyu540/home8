@@ -3,13 +3,13 @@ const express = require('express');
 const router = express.Router();
 const users = require('../db/table/users')
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-router.put('/',  async (req,res) => {
+router.put('/listings',  async (req,res) => {
     console.log(req.user);
     const email = req.user['https://home8-api.com/email'];
     const username = req.user['https://home8-api.com/username'];
     const userid = req.user.sub;
     console.log(req.user.sub)
-    console.log('endpoint: /private ', email, username);
+    console.log('endpoint: /private/listings ', email, username);
     //search in users
     try {
         const results = await users.getUserByUserid(userid);

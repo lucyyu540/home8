@@ -5,7 +5,6 @@ import OlView from "ol/View";
 import OlLayerTile from "ol/layer/Tile";
 import OlSourceOSM from "ol/source/OSM";
 import {toLonLat, fromLonLat, transform} from 'ol/proj';
-import SearchMap from './searchMap';
 
 
 
@@ -26,7 +25,7 @@ class Map extends Component {
       var long = position.coords.longitude;
       var lat = position.coords.latitude;
       let center = fromLonLat([long,lat]);
-      let zoom = 15;
+      let zoom = 14;
       this.setState({center,zoom});
     })
     .catch((err) => {
@@ -47,12 +46,14 @@ class Map extends Component {
 
     
   }
-
+/**
+ * 0: -8242276.281937191
+1: 4970792.388188603
+ */
 
   updateMap() {
     this.olmap.getView().setCenter(this.state.center);
     this.olmap.getView().setZoom(this.state.zoom);
-    console.log(this.olmap.getView().calculateExtent(this.olmap.getSize()));
   } 
 
 
@@ -65,6 +66,8 @@ class Map extends Component {
       let center = this.olmap.getView().getCenter();
       let zoom = this.olmap.getView().getZoom();
       this.setState({ center, zoom });
+      this.props.mapUpdateRange(this.olmap.getView().calculateExtent(this.olmap.getSize()))
+
     });
     console.log('component did mount:',this.props.searchCoordinates)
   }
@@ -77,17 +80,13 @@ class Map extends Component {
         {center: fromLonLat([this.props.searchCoordinates.longitude,this.props.searchCoordinates.latitude]), 
           zoom : 14}
       )
-      this.props.mapUpdatedChange();
+      this.props.mapUpdatedChange(false);
+      this.props.mapUpdateRange(this.olmap.getView().calculateExtent(this.olmap.getSize()))
     }
-    /**this.setState(
-      {center: fromLonLat([this.props.longitude,this.props.latitude]), 
-        zoom : 14}
-    );*/
   }
   
-  //everytime olmap changes view
+  //everytime state/prop change
   shouldComponentUpdate(nextProps, nextState) {
-    console.log('should comp update',this.props.searchCoordinates);
     console.log('needToChange', this.props.needToChange)
     if (this.props.needToChange) return true;
     let center = this.olmap.getView().getCenter();
@@ -104,7 +103,7 @@ class Map extends Component {
   render() {
     this.updateMap();
     return (
-      <div id="map" style={{ height: "100vh" }}>
+      <div id="map" style={{ height: "100vh", 'padding-bottom': '50'}}>
       </div>
     );
   }

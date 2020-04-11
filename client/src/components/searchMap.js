@@ -1,4 +1,4 @@
-import React, { Fragment , useEffect} from "react";
+import React, { useEffect} from "react";
 import { makeStyles, createStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import InputBase from '@material-ui/core/InputBase';
@@ -14,7 +14,7 @@ import Geocode from "react-geocode";
 /**MY MODULES */
 import Map from './map'
 import config from "../auth_config.json";
-
+import GoogleMap from './googleMap'
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -42,16 +42,34 @@ const useStyles = makeStyles((theme) =>
   }),
 );
 
-
+/**SEARCH BY ADDRESS */
 Geocode.setApiKey(config.GOOGLE_API_KEY);
 Geocode.setLanguage("en");
 Geocode.enableDebug();
 
 
-export default function CustomizedInputBase() {
+export default function SearchMap(props) {
   const classes = useStyles();
+  /**Range */
+     //bottom left long lat: a, b
+    //top right long lat: c, d
+    //a, b, c , d,
+    /** long --> x axis lat --> y axis
+     * a,d  c,d
+     * a,b  c,b
+     */
+  const [range, setRange] = React.useState([0,0,0,0]);
+  function mapUpdateRange(value) {
+    setRange(value);
+  }
+  useEffect(()=> {
+    props.updateRange(range);
+  }, range);
+
+  /**search area */
   const [searchInput, setSearchInput] = React.useState("");
   const [searchCoordinates, setSearchCoordinates] = React.useState(null);
+  /**map update */
   const [needToChange, setNeedToChange] = React.useState(false);
   function mapUpdatedChange() {
     setNeedToChange(false);
@@ -60,7 +78,7 @@ export default function CustomizedInputBase() {
   function handleSearchInput(e) {
     setSearchInput(e.target.value);
   }
-  function handleSearchClick(e) {
+  function handleSearchClick() {
     if (searchInput === "") return;
     Geocode.fromAddress(searchInput).then(
       response => {
@@ -73,9 +91,6 @@ export default function CustomizedInputBase() {
       }
     );
   }
-  /**console.log('longs and lat retrieved from search area: ')
-  console.log(longitude);
-  console.log(latitude);*/
   return (
     <div className={classes.root}>
 
@@ -107,8 +122,14 @@ export default function CustomizedInputBase() {
       
     </Paper>
 
+
+    {/**<GoogleMap />*/}
     {/**MAP */}
-    <Map needToChange={needToChange} searchCoordinates={searchCoordinates} mapUpdatedChange={mapUpdatedChange}/>
+    <Map needToChange={needToChange} 
+    searchCoordinates={searchCoordinates} 
+    mapUpdatedChange={mapUpdatedChange}
+    mapUpdateRange={mapUpdateRange}
+    />
     </div>
   );
 }
