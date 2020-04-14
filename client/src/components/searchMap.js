@@ -59,21 +59,19 @@ export default function SearchMap(props) {
      * a,b  c,b
      */
   const [range, setRange] = React.useState([0,0,0,0]);
-  function mapUpdateRange(value) {
+  function mapUpdateRange(value) {//child
     setRange(value);
   }
   useEffect(()=> {
-    props.updateRange(range);
+    props.updateRange(range);//parent
   }, range);
 
   /**search area */
   const [searchInput, setSearchInput] = React.useState("");
   const [searchCoordinates, setSearchCoordinates] = React.useState(null);
-  /**map update */
-  const [needToChange, setNeedToChange] = React.useState(false);
-  function mapUpdatedChange() {
-    setNeedToChange(false);
-  }
+
+  var listings = props.listings;
+
   /**HANDLE FUNCTIONS */
   function handleSearchInput(e) {
     setSearchInput(e.target.value);
@@ -83,7 +81,6 @@ export default function SearchMap(props) {
     Geocode.fromAddress(searchInput).then(
       response => {
         const { lat, lng } = response.results[0].geometry.location;
-        setNeedToChange(true);
         setSearchCoordinates({longitude : lng, latitude: lat});
       },
       error => {
@@ -125,10 +122,10 @@ export default function SearchMap(props) {
 
     {/**<GoogleMap />*/}
     {/**MAP */}
-    <Map needToChange={needToChange} 
+    <Map 
     searchCoordinates={searchCoordinates} 
-    mapUpdatedChange={mapUpdatedChange}
     mapUpdateRange={mapUpdateRange}
+    listings={listings}
     />
     </div>
   );

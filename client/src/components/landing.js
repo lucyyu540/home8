@@ -9,9 +9,12 @@ import SearchMap from './searchMap'
 import '../App.css'
 export default function Landing() {
     const[listings, setListings] = React.useState();
+    const[favoriteListings, setFavoriteListings] = React.useState();
     const [range, setRange] = React.useState([0,0,0,0]);
+    const [readyAPI, setReadyAPI] = React.useState(false);
     function updateRange(value) {
         setRange(value);
+        setReadyAPI(true);
     }
   const { getTokenSilently, user } = useAuth0();
   /**API CALLS */
@@ -35,7 +38,8 @@ export default function Landing() {
       });
       const responseData = await response.json();
       console.log(responseData);
-      setListings(responseData);
+      setListings(responseData.public);
+      setFavoriteListings(responseData.favorites);
 
     } catch (error) {
       console.log(error)
@@ -66,13 +70,11 @@ export default function Landing() {
   }
   /**updating listings based on map view*/
   useEffect( ()=> {
-  if (user) {
-   getCustomListings(range);
-  }
-  else {
-    console.log('not logged on)')
-    getListings(range);
-  } 
+    if (readyAPI) {
+        if (user) getCustomListings(range);
+        else getListings(range);
+        setReadyAPI(false);
+    }
   }, [user, range] )
 
 
@@ -82,8 +84,14 @@ export default function Landing() {
 
     return( 
         <div className='rowC'>
-            <SearchMap updateRange={updateRange}/>
-            <ListingResults listings={listings}/>
+            <SearchMap 
+            updateRange={updateRange}
+            listings={listings}
+            />
+            <ListingResults 
+            listings={listings}
+            favoriteListings = {favoriteListings}
+            />
         </div>
     );
 }

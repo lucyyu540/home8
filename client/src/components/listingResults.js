@@ -8,29 +8,13 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import Avatar from '@material-ui/core/Avatar';
-import { useAuth0, user } from "../react-auth0-spa";
 
-const messages = [
-  {
-    id: 1,
-    primary: 'Brunch this week?',
-    secondary: "I'll be in the neighbourhood this week. Let's grab a bite to eat",
-    person: '/static/images/avatar/5.jpg',
-  },
-  {
-    id: 2,
-    primary: 'Birthday Gift',
-    secondary: `Do you have a suggestion for a good present for John on his work
-      anniversary. I am really confused & would love your thoughts on it.`,
-    person: '/static/images/avatar/1.jpg',
-  },
-  {
-    id: 3,
-    primary: 'Recipe to try',
-    secondary: 'I am try out this new BBQ recipe, I think this might be amazing',
-    person: '/static/images/avatar/2.jpg',
-  }
-];
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import Popover from '@material-ui/core/Popover';
+/**ICONS */
+import CheckIcon from '@material-ui/icons/Check';
+import CloseIcon from '@material-ui/icons/Close';
 
 const useStyles = makeStyles((theme) => ({
   text: {
@@ -47,40 +31,115 @@ const useStyles = makeStyles((theme) => ({
   subheader: {
     backgroundColor: theme.palette.background.paper,
   },
+  listItem : {
+    alignItems: 'left'
+  },
+  popover: {
+    pointerEvents: 'none',
+  },
+  popup: {
+    padding: theme.spacing(1)
+  }
 }));
 
 export default function ListingResults(props) {
   const classes = useStyles();
   var listings = props.listings;
-  var favoriteListings = [];
+  var favoriteListings = props.favoriteListings;
   if (!listings) listings = [];
+  if (!favoriteListings) favoriteListings = [];
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const handlePopoverOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
 
   return (
     <React.Fragment>
       <CssBaseline />
       <Paper square className={classes.paper}>
         <List className={classes.list}>
-        {favoriteListings.map(({ lid, address, owner }) => (
+        {favoriteListings.map(({ lid, bed, bath, roomType, owner }) => (
             <React.Fragment key={lid}>
               <ListSubheader className={classes.subheader}>Favorited</ListSubheader>
-              <ListItem button>
+              <ListItem button className={classes.listItem}>
                 <ListItemAvatar>
                   <Avatar alt="Profile Picture" />
                 </ListItemAvatar>
-                <ListItemText primary={address} secondary={owner[1]} />
+                <ListItemText primary={roomType} secondary={owner[1]} />
               </ListItem>
             </React.Fragment>
           ))}
-          {listings.map(({ lid, address, owner }) => (
-            <React.Fragment key={lid}>
-              <ListSubheader className={classes.subheader}>Recent</ListSubheader>
-              <ListItem button>
-                <ListItemAvatar>
-                  <Avatar alt="Profile Picture" />
-                </ListItemAvatar>
-                <ListItemText primary={address} secondary={owner[1]} />
-              </ListItem>
-            </React.Fragment>
+          {listings.map(({ lid, building, doorman, laundry, owner , roomType, bed, bath, count}) => (
+          <React.Fragment key={lid}>
+          <ListSubheader className={classes.subheader}>Recent</ListSubheader>
+          <ListItem button>
+          <ListItemAvatar><Avatar alt="Profile Picture" /></ListItemAvatar>
+          <Grid item xs={12} sm container>
+            <Grid item xs container direction="column" spacing={2}>
+              <Grid item xs>
+                <Typography gutterBottom variant="subtitle1">
+                {roomType} {bed}bed{bath}bath
+                </Typography>
+                <Typography 
+                  variant="body2" 
+                  aria-owns={open ? 'mouse-over-popover' : undefined}
+                  aria-haspopup="true"
+                  onMouseEnter={handlePopoverOpen}
+                  onMouseLeave={handlePopoverClose}
+                >
+                Owner: {owner[1]}
+                </Typography>
+                <Popover
+                id="mouse-over-popover"
+                className={classes.popover}
+                classes={{paper: classes.popup}}
+                open={open}
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'left',
+                }}
+                onClose={handlePopoverClose}
+                disableRestoreFocus
+                >
+                <Typography>Personality Match Score</Typography>
+                </Popover>
+                {doorman &&(
+                <Typography variant="body2" color="textSecondary">
+                Doorman: <CheckIcon fontSize='small'/>
+                </Typography>
+                )}
+                {!doorman && (
+                <Typography variant="body2" color="textSecondary">
+                Doorman: <CloseIcon fontSize='small'/>
+                </Typography>
+                )}
+                <Typography variant="body2" color="textSecondary">
+                  Building: {building}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Laundry: {laundry}
+                </Typography>
+              </Grid>
+            </Grid>
+            <Grid item>
+              <Typography variant="body2" color="textSecondary">
+                {count} people
+              </Typography>
+            </Grid>            
+          </Grid>
+          </ListItem>
+          </React.Fragment>
           ))}
         </List>
       </Paper>

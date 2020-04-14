@@ -6,6 +6,9 @@ var app = express(); //initialize app variable
 const indexRouter = require("./routes/index");
 const privateRouter = require('./routes/private');
 const db = require('./db/index');
+const users = require('./db/table/users')
+const favoriteListings = require('./db/table/favoriteListings')
+
 
 /**MODULES */
 const bodyParser = require('body-parser');//access req.body
@@ -20,7 +23,7 @@ const morgan = require('morgan');
 
 
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~AUTH~CONFIG~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
+//checking with auth0
 var jwtCheck = jwt({
 	secret: jwks.expressJwtSecret({
 		cache: true,
@@ -32,7 +35,29 @@ var jwtCheck = jwt({
   issuer: 'https://soyuwantapotato.auth0.com/',
   algorithms: ['RS256']
 }); 
-
+//checking with mysql
+async function checkUsers(req, res, next) {
+	console.log('in checkUsers middleware')
+	const userid = req.user.sub;
+	const username = req.user['https://home8-api.com/username'];
+    const email = req.user['https://home8-api.com/email'];
+	try{
+		const user = await users.getUserByUserid(userid);
+		console.log('middleware found user', user);
+		next();
+	}
+	catch (err) {
+		console.log('creating new user')
+		try {
+			const user = await users.createNewUser(userid, email, username);
+			const favorites = await favoriteListings.createNewUser(userid);
+			next();
+		}
+		catch(err) {
+			res.json('user not in mysql and cannot create new user');
+		}
+	}
+}
 
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~MIDDLEWARE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 app.use(cors());
@@ -42,7 +67,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~ROUTES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 app.use('/', indexRouter)
-app.use('/private', jwtCheck, privateRouter );//protected
+app.use('/private', jwtCheck, checkUsers, privateRouter );//protected
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ERROR~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 app.use(function(req, res, next) {
 	var err = new Error('Not Found');

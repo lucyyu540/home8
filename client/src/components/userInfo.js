@@ -100,9 +100,8 @@ export default function Profile(props){
             size="small"
             component={Link} to={`/${user.nickname}/edit`}>Edit</Button>
           )}
-          <ListItem></ListItem>
           <List className={classes.list}>
-            <div item className='name'> @{thisUser.username}</div>
+            <div className='name'> @{thisUser.username}</div>
             <Divider/>
             <ListItem item>Name: {thisUser.firstName } {thisUser.lastName } </ListItem>
             <ListItem item>Date of Birth: {thisUser.dob}</ListItem>

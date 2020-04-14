@@ -4,8 +4,13 @@ import OlMap from "ol/Map";
 import OlView from "ol/View";
 import OlLayerTile from "ol/layer/Tile";
 import OlSourceOSM from "ol/source/OSM";
+import OlFeature from 'ol/Feature';
+import OlGeometryPoint from 'ol/geom/Point';
+import OlSourceVector from 'ol/source/Vector';
+import OlLayerVector from 'ol/layer/Vector';
+import olStyleStyle from 'ol/style/Style';
+import olStyleIcon from 'ol/style/Icon'
 import {toLonLat, fromLonLat, transform} from 'ol/proj';
-
 
 
 class Map extends Component {
@@ -36,7 +41,7 @@ class Map extends Component {
       layers: [
         new OlLayerTile({
           source: new OlSourceOSM()
-        })
+        })//base map layer
       ],
       view: new OlView({
         center: this.state.center,
@@ -80,15 +85,39 @@ class Map extends Component {
         {center: fromLonLat([this.props.searchCoordinates.longitude,this.props.searchCoordinates.latitude]), 
           zoom : 14}
       )
-      this.props.mapUpdatedChange(false);
+      //get map view range
       this.props.mapUpdateRange(this.olmap.getView().calculateExtent(this.olmap.getSize()))
     }
+    //adding marker to map
+    if (this.props.listings){
+    var vectorSource = new OlSourceVector({features:[]});
+    for (var i = 0; i < this.props.listings.length ; i ++) {
+      const coordinates = [this.props.listings[i].longitude, this.props.listings[i].latitude];
+      const marker = new OlFeature({geometry:new OlGeometryPoint(coordinates)})
+      vectorSource.addFeature(marker);
+    }
+    var iconStyle = new olStyleStyle({
+      image: new olStyleIcon(/** @type {olx.style.IconOptions} */ ({
+        anchor: [0.5, 0.5],
+        anchorXUnits: 'fraction',
+        anchorYUnits: 'pixels',
+        opacity: 0.75,
+        scale: 0.1,
+        src:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Map_marker_font_awesome.svg/200px-Map_marker_font_awesome.svg.png',
+      }))
+    });
+    var markerVectorLayer = new OlLayerVector({
+      source: vectorSource,
+      style: iconStyle
+    });
+    this.olmap.addLayer(markerVectorLayer);
+  }    
   }
   
   //everytime state/prop change
   shouldComponentUpdate(nextProps, nextState) {
-    console.log('needToChange', this.props.needToChange)
-    if (this.props.needToChange) return true;
+    if (this.props.searchCoordinates !== nextProps.searchCoordinates) return true;
+    if (this.props.listings !== nextProps.listings) return true;
     let center = this.olmap.getView().getCenter();
     let zoom = this.olmap.getView().getZoom();
     if (center === nextState.center && zoom === nextState.zoom) return false;
@@ -103,7 +132,7 @@ class Map extends Component {
   render() {
     this.updateMap();
     return (
-      <div id="map" style={{ height: "100vh", 'padding-bottom': '50'}}>
+      <div id="map" style={{ height: "100vh", paddingBottom: '50'}}>
       </div>
     );
   }

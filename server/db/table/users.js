@@ -6,13 +6,12 @@ db.updateUserByUserid = (firstName, lastName, dob, phone, nationality, gender, g
         sql.query('UPDATE users SET firstName = ?, lastName = ?, dob = ?, phone = ?, nationality = ?, gender = ?, genderPreference = ? WHERE userid = ?', 
         [firstName, lastName, dob, phone, nationality, gender, genderPreference, userid] , (err, results) => {
             if (err) return rej(err);
-            return res(results);
+            return res(results[0]);
         })
     })
 
 }
 db.getUsernameByUserid = (userid) => {
-    console.log('searching username with id: ', userid);
     return new Promise((res, rej) => {
         sql.query('SELECT username FROM users WHERE userid = ?',[userid], (err, results) => {
             if (err) return rej(err);
@@ -29,7 +28,7 @@ db.getUserByUserid = (userid) => {
         sql.query('SELECT * FROM users WHERE userid = ?',[userid], (err, results) => {
             if (err) return rej(err);
             if (results.length > 0) {
-                return res(results);//exists
+                return res(results[0]);//exists
             }
             return rej(err);
         });
@@ -41,7 +40,7 @@ db.getUserByUsername = (username) => {
         sql.query('SELECT * FROM users WHERE username = ?',[username], (err, results) => {
             if (err) return rej(err);
             if (results.length > 0) {
-                return res(results);//exists
+                return res(results[0]);//exists
             }
             return rej(err);
         });
@@ -53,7 +52,7 @@ db.getProtectedUserByUsername = (username) => {
         sql.query('SELECT username, firstName, lastName, gender, nationality, dob FROM users WHERE username = ?',[username], (err, results) => {
             if (err) return rej(err);
             if (results.length > 0) {
-                return res(results);//exists
+                return res(results[0]);//exists
             }
             return rej(err);
         });
@@ -66,7 +65,7 @@ db.getUserIdByEmail = (email) => {
         sql.query('SELECT userid FROM users WHERE email = ?',[email], (err, results) => {
             if (err) return rej(err);
             if (results.length > 0) {
-                return res(results);//exists
+                return res(results[0]);//exists
             }
             return rej(err);
         });
@@ -76,7 +75,7 @@ db.createNewUser = (userid, email, username) => {
     return new Promise ((res, rej) => {
         sql.query('INSERT INTO users (userid, email, username) VALUES (?)', [userid, email, username] , (err, results) => {
             if (err) return rej(err);
-            return res(results);
+            return res(results[0]);
         })
     })
 }
@@ -87,7 +86,7 @@ db.updateUsername = (id, username) => {
                 console.log(err);
                 return rej(err);
             }
-            return res(results);
+            return res(results[0]);
         })
     })
 }

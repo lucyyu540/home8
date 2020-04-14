@@ -51,8 +51,8 @@ router.put('/:username', async (req, res) => {
     //search in users
     try {
         const results = await users.getProtectedUserByUsername(req.params.username);
-        console.log(results[0]);
-        res.json(results[0]).end();
+        console.log(results);
+        res.json(results).end();
     }
     catch (err) {
         console.log(err);

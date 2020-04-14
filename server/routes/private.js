@@ -2,60 +2,67 @@
 const express = require('express');
 const router = express.Router();
 const users = require('../db/table/users')
+const listings = require('../db/table/listings')
+const favoriteListings = require('../db/table/favoriteListings');
+
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 router.put('/listings',  async (req,res) => {
-    console.log(req.user);
-    const email = req.user['https://home8-api.com/email'];
-    const username = req.user['https://home8-api.com/username'];
     const userid = req.user.sub;
-    console.log(req.user.sub)
-    console.log('endpoint: /private/listings ', email, username);
+    console.log('endpoint: /private/listings ');
+
+    const a = req.body.a;
+    const b = req.body.b;
+    const c = req.body.c;
+    const d = req.body.d;
+
+    const sorted = {
+        favorites: [],
+        public: []
+    }
     //search in users
     try {
-        const results = await users.getUserByUserid(userid);
-        console.log(results[0]);
-        res.json(results[0]).end();
+        const favorites = await favoriteListings.getListingsByUserid(userid);
+        console.log('favorites: ', favorites);
+        const results = await listings.getListingsByCoordinates(a,b,c,d);
+        for (var i = 0 ; i < results.length; i ++) {
+            const owner = await users.getUsernameByUserid(results[i].owner);
+            results[i].owner = [results[i].owner, owner];
+            for (var j = 1; j <= 6; j ++) {
+                var mate = 'mate'+j;
+                console.log(mate, results[i][mate]);
+                if (results[i][mate] !== null){
+                    console.log('fetching username');
+                    const temp = await users.getUsernameByUserid(results[i][mate]);
+                    results[i][mate] = [results[i][mate], temp];
+                    console.log(results[i][mate]);
+                }
+            }
+            const lid = 'lid'+results[i].lid;
+            if (favorites[lid]) sorted.favorites.push(results[i]);
+            else sorted.public.push(results[i]);
+        }
+        console.log(sorted);
+        res.json(sorted).end();
     }
     catch (err) {
-        console.log('user DNE in mysql');
-        try {
-            const results = await users.createNewUser(userid, email, username);
-            console.log('inserted user in mysql');
-            console.log(results[0]);
-            res.json(results[0]).end();
-            
-        }
-        catch (err) {
-            console.log('error in inserting new user');
-            res.json('user DNE and failed to insert in mysql').end()
-        }
-    }
-    //return favorited listings
-    
-    //else if not found, create new user in users
-    //res.json('/users page for listings')
-
+        console.log('the error',err);
+    }   
 })
-/**PROFILE GIVEN USERNAME */
+/**PRIVATE PROFILE GIVEN USERNAME */
 router.put('/my-profile', async (req, res) => {
     const userid = req.user.sub;
     console.log('endpoint: private/my-profile');
     //search in users
     try {
         const results = await users.getUserByUserid(userid);
-        console.log(results[0]);
-        res.json(results[0]).end();
+        console.log(results);
+        res.json(results).end();
     }
     catch (err) {
         console.log(err);
         console.log('user DNE in mysql');
         res.json(err);
     }
-    //return favorited listings
-    
-    //else if not found, create new user in users
-    //res.json('/users page for listings')
-
 })
 router.put('/edit-profile', async (req, res) => {
     const userid = req.user.sub;
@@ -77,4 +84,20 @@ router.put('/edit-profile', async (req, res) => {
         res.json(err);
     }
 });
+
+function euclideanDistance(A, B) {
+    var sum = 0;
+    var maxDistance = 0;
+    for (var i = 0 ; i < A.length; i ++) {
+        if (A[i] || B[i]) break;
+        sum += Math.pow(A[i] - B[i], 2);//(a-b)^2
+        maxDistance += 16;
+    }
+    var distance = Math.sqrt(sq);
+    maxDistance = Math.sqrt(maxDistance);
+    if (maxDistance == 0) return 0;
+    const percentage = (distance/maxDistance);
+    return (1-percentage)*100;
+}
+
 module.exports = router;
