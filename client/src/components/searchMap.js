@@ -120,9 +120,6 @@ export default function SearchMap(props) {
       </IconButton>
       
     </Paper>
-
-
-    {/**<GoogleMap />*/}
     {/**MAP */}
     <Map 
     searchCoordinates={searchCoordinates} 

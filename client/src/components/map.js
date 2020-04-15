@@ -23,7 +23,7 @@ class Map extends Component {
     new Promise((res,rej) => {
       var options = {
         enableHighAccuracy: true,
-        timeout: 5000
+        //timeout: 5000
       }
       navigator.geolocation.getCurrentPosition(res,rej, options);
     })
@@ -48,14 +48,9 @@ class Map extends Component {
         center: this.state.center,
         zoom: this.state.zoom
       })
-    });
-
-    
+    });    
   }
-/**
- * 0: -8242276.281937191
-1: 4970792.388188603
- */
+
 
   updateMap() {
     this.olmap.getView().setCenter(this.state.center);
@@ -65,17 +60,14 @@ class Map extends Component {
 
   componentDidMount() {
     this.olmap.setTarget("map");
-
     // Listen to map changes
     this.olmap.on("moveend", () => {
-      console.log('moved')
       let center = this.olmap.getView().getCenter();
       let zoom = this.olmap.getView().getZoom();
       this.setState({ center, zoom });
       this.props.mapUpdateRange(this.olmap.getView().calculateExtent(this.olmap.getSize()))
-
     });
-    console.log('component did mount:',this.props.searchCoordinates)
+    console.log('component did mount')
   }
 
   componentDidUpdate(nextProps, prevState) {
@@ -90,7 +82,7 @@ class Map extends Component {
       //get map view range
       this.props.mapUpdateRange(this.olmap.getView().calculateExtent(this.olmap.getSize()))
     }
-    //adding marker to map
+    //adding markers to map
     if (this.props.listings && this.props.listings !== nextProps.listings){
       console.log(this.props.listings);
       console.log(nextProps.listings);
@@ -122,7 +114,7 @@ class Map extends Component {
       });
       this.olmap.addLayer(markerVectorLayer);
     } 
-    //hovered
+    //enlarge hovered
     if (this.props.hovered) {
       console.log('hovering', this.props.hovered)
       this.olmap.getLayers().forEach(layer => {
@@ -143,8 +135,8 @@ class Map extends Component {
         }
       });
     }
+    //minimize previously hovered
     else if (nextProps.hovered) {
-      console.log('need to unhover this', nextProps.hovered);
       this.olmap.getLayers().forEach(layer => {
         if (layer.get('title') == 'markers') {
           var iconStyle = new olStyleStyle({

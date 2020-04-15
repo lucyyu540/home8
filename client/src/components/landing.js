@@ -2,7 +2,6 @@ import React, { useEffect} from "react";
 import { useAuth0, user } from "../react-auth0-spa";
 
 /** MY MODULES */
-import Map from './map'
 import ListingResults from './listingResults'
 import SearchMap from './searchMap'
 
@@ -101,7 +100,7 @@ export default function Landing() {
             favoriteListings = {favoriteListings}
             updateHovered = {updateHovered}
             updateSelected = {updateSelected}
-            />
+            />            
         </div>
     );
 }

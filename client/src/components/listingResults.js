@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Paper from '@material-ui/core/Paper';
+/**LIST */
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
@@ -15,6 +16,17 @@ import Popover from '@material-ui/core/Popover';
 /**ICONS */
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
+/**DIALOG */
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+/**MY MODULES */
+import Submap from './submap';
+import Map from './map'
+import GoogleMap from './googleMap'
 
 const useStyles = makeStyles((theme) => ({
   text: {
@@ -48,7 +60,7 @@ export default function ListingResults(props) {
   var favoriteListings = props.favoriteListings;
   if (!listings) listings = [];
   if (!favoriteListings) favoriteListings = [];
-
+  /**POP UP PERSONALITY ANALYSIS */
   const [anchorEl, setAnchorEl] = React.useState(null);
   const handlePopoverOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -57,10 +69,21 @@ export default function ListingResults(props) {
     setAnchorEl(null);
   };
   const open = Boolean(anchorEl);
-  function handleSelected(e){
-    console.log('clicked a listing', e);
-    props.updateSelected(e);
+  /**HANDLE SELECTED LISTING */
+  const [on, setOn] = React.useState(false);
+  const [ind, setInd] = React.useState(null);
+  function handleClickOpen(e){
+    console.log('clicked a listing', listings[e].lid);
+    props.updateSelected(listings[e].lid);
+    setInd(e);
+    setOn(true);
   }
+  function handleClose() {
+    setOn(false);
+  }
+  
+  
+  /**HANDLE MOUSE HOVERING */
   function handleHovered(e) {
     console.log('hovering over a listing', e);
     props.updateHovered(e);
@@ -68,6 +91,8 @@ export default function ListingResults(props) {
   function unhandleHovered(e) {
     props.updateHovered(null);
   }
+  
+
   return (
     <React.Fragment>
       <CssBaseline />
@@ -84,22 +109,21 @@ export default function ListingResults(props) {
               </ListItem>
             </React.Fragment>
           ))}
-          {listings.map(({ lid, building, doorman, laundry, owner , roomType, bed, bath, count}) => (
-          <React.Fragment key={lid}>
+          {listings.map( (key, index) => (
+          <React.Fragment key={index}>
           <ListSubheader className={classes.subheader}>Recent</ListSubheader>
           <ListItem 
             button
-            key = {lid}
-            onClick={() => handleSelected(lid)}
-            onMouseEnter={() => handleHovered(lid)}
-            onMouseLeave={() => unhandleHovered(lid)}
+            onClick={() => handleClickOpen(index)}
+            onMouseEnter={() => handleHovered(listings[index].lid)}
+            onMouseLeave={() => unhandleHovered(listings[index].lid)}
           >
           <ListItemAvatar><Avatar alt="Profile Picture" /></ListItemAvatar>
           <Grid item xs={12} sm container>
             <Grid item xs container direction="column" spacing={2}>
               <Grid item xs>
                 <Typography gutterBottom variant="subtitle1">
-                {roomType} {bed}bed{bath}bath
+                {listings[index].roomType} {listings[index].bed}bed{listings[index].bath}bath
                 </Typography>
                 <Typography 
                   variant="body2" 
@@ -108,7 +132,7 @@ export default function ListingResults(props) {
                   onMouseEnter={handlePopoverOpen}
                   onMouseLeave={handlePopoverClose}
                 >
-                Owner: {owner[1]}
+                {listings[index].owner[1]}
                 </Typography>
                 <Popover
                 id="mouse-over-popover"
@@ -129,27 +153,30 @@ export default function ListingResults(props) {
                 >
                 <Typography>Personality Match Score</Typography>
                 </Popover>
-                {doorman &&(
+                {listings[index].doorman &&(
                 <Typography variant="body2" color="textSecondary">
                 Doorman: <CheckIcon fontSize='small'/>
                 </Typography>
                 )}
-                {!doorman && (
+                {!listings[index].doorman && (
                 <Typography variant="body2" color="textSecondary">
                 Doorman: <CloseIcon fontSize='small'/>
                 </Typography>
                 )}
                 <Typography variant="body2" color="textSecondary">
-                  Building: {building}
+                  Building: {listings[index].building}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Laundry: {laundry}
+                  Laundry: {listings[index].laundry}
                 </Typography>
               </Grid>
             </Grid>
             <Grid item>
+              <Typography gutterBottom variant="subtitle1">
+                ${listings[index].price}
+              </Typography>
               <Typography variant="body2" color="textSecondary">
-                {count} people
+                {listings[index].count} people
               </Typography>
             </Grid>            
           </Grid>
@@ -158,6 +185,45 @@ export default function ListingResults(props) {
           ))}
         </List>
       </Paper>
+
+      {/**POP UP */}
+      {ind!=null && (<div>
+      <Dialog
+        open={on}
+        onClose={handleClose}
+        scroll='paper'
+        aria-labelledby="scroll-dialog-title"
+        aria-describedby="scroll-dialog-description"
+        maxWidth='sm'
+        fullWidth
+      >
+        <Submap coordinates={[listings[ind].longitude, listings[ind].latitude]} />
+        <DialogTitle id="scroll-dialog-title">
+          {listings[ind].roomType} {listings[ind].bed}bed{listings[ind].bath}bath
+        </DialogTitle>
+        <DialogContent dividers>
+        <div>{listings[ind].address}</div>
+        <div>Roomates: </div>
+        <div>${listings[ind].price}</div>
+          <DialogContentText
+            id="scroll-dialog-description"
+          >
+            {listings[ind].description}
+            Building: {listings[ind].building}
+            Laundry: {listings[ind].laundry}
+
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Request
+          </Button>
+          <Button onClick={handleClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>)}
     </React.Fragment>
   );
 }
