@@ -56,9 +56,18 @@ export default function ListingResults(props) {
   const handlePopoverClose = () => {
     setAnchorEl(null);
   };
-
   const open = Boolean(anchorEl);
-
+  function handleSelected(e){
+    console.log('clicked a listing', e);
+    props.updateSelected(e);
+  }
+  function handleHovered(e) {
+    console.log('hovering over a listing', e);
+    props.updateHovered(e);
+  }
+  function unhandleHovered(e) {
+    props.updateHovered(null);
+  }
   return (
     <React.Fragment>
       <CssBaseline />
@@ -78,7 +87,13 @@ export default function ListingResults(props) {
           {listings.map(({ lid, building, doorman, laundry, owner , roomType, bed, bath, count}) => (
           <React.Fragment key={lid}>
           <ListSubheader className={classes.subheader}>Recent</ListSubheader>
-          <ListItem button>
+          <ListItem 
+            button
+            key = {lid}
+            onClick={() => handleSelected(lid)}
+            onMouseEnter={() => handleHovered(lid)}
+            onMouseLeave={() => unhandleHovered(lid)}
+          >
           <ListItemAvatar><Avatar alt="Profile Picture" /></ListItemAvatar>
           <Grid item xs={12} sm container>
             <Grid item xs container direction="column" spacing={2}>

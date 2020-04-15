@@ -71,6 +71,8 @@ export default function SearchMap(props) {
   const [searchCoordinates, setSearchCoordinates] = React.useState(null);
 
   var listings = props.listings;
+  var selected = props.selected;
+  var hovered = props.hovered;
 
   /**HANDLE FUNCTIONS */
   function handleSearchInput(e) {
@@ -126,6 +128,8 @@ export default function SearchMap(props) {
     searchCoordinates={searchCoordinates} 
     mapUpdateRange={mapUpdateRange}
     listings={listings}
+    selected={selected}
+    hovered={hovered}
     />
     </div>
   );

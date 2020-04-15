@@ -11,6 +11,7 @@ import OlLayerVector from 'ol/layer/Vector';
 import olStyleStyle from 'ol/style/Style';
 import olStyleIcon from 'ol/style/Icon'
 import {toLonLat, fromLonLat, transform} from 'ol/proj';
+import { red } from '@material-ui/core/colors';
 
 
 class Map extends Component {
@@ -78,6 +79,7 @@ class Map extends Component {
   }
 
   componentDidUpdate(nextProps, prevState) {
+    //handle searched area view
     console.log('component did update',this.props.searchCoordinates);
     if (this.props.searchCoordinates !== nextProps.searchCoordinates) {
       console.log('changed')
@@ -89,35 +91,86 @@ class Map extends Component {
       this.props.mapUpdateRange(this.olmap.getView().calculateExtent(this.olmap.getSize()))
     }
     //adding marker to map
-    if (this.props.listings){
-    var vectorSource = new OlSourceVector({features:[]});
-    for (var i = 0; i < this.props.listings.length ; i ++) {
-      const coordinates = [this.props.listings[i].longitude, this.props.listings[i].latitude];
-      const marker = new OlFeature({geometry:new OlGeometryPoint(coordinates)})
-      vectorSource.addFeature(marker);
+    if (this.props.listings && this.props.listings !== nextProps.listings){
+      console.log(this.props.listings);
+      console.log(nextProps.listings);
+      var iconStyle = new olStyleStyle({
+        image: new olStyleIcon(/** @type {olx.style.IconOptions} */ ({
+          anchor: [0.5, 0.5],
+          anchorXUnits: 'fraction',
+          anchorYUnits: 'pixels',
+          opacity: 0.75,
+          scale: 0.13,
+          src:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Map_marker_font_awesome.svg/200px-Map_marker_font_awesome.svg.png',
+        }))
+      });
+      var vectorSource = new OlSourceVector({features:[]});
+      for (var i = 0; i < this.props.listings.length ; i ++) {
+        const coordinates = [this.props.listings[i].longitude, this.props.listings[i].latitude];
+        const id = this.props.listings[i].lid;
+        const marker = new OlFeature({
+          geometry:new OlGeometryPoint(coordinates),
+        })
+        marker.setId(id);
+        marker.setStyle(iconStyle)
+        vectorSource.addFeature(marker);
+      }
+      var markerVectorLayer = new OlLayerVector({
+        title: 'markers',
+        source: vectorSource,
+        style: iconStyle
+      });
+      this.olmap.addLayer(markerVectorLayer);
+    } 
+    //hovered
+    if (this.props.hovered) {
+      console.log('hovering', this.props.hovered)
+      this.olmap.getLayers().forEach(layer => {
+        if (layer.get('title') == 'markers') {
+          var iconStyle = new olStyleStyle({
+            image: new olStyleIcon(/** @type {olx.style.IconOptions} */ ({
+              anchor: [0.5, 0.5],
+              anchorXUnits: 'fraction',
+              anchorYUnits: 'pixels',
+              opacity: 0.75,
+              scale: 0.2,
+              src:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Map_marker_font_awesome.svg/200px-Map_marker_font_awesome.svg.png',
+            }))
+          });
+          const source = layer.getSource();
+          const feature = source.getFeatureById(this.props.hovered);
+          feature.setStyle(iconStyle);
+        }
+      });
     }
-    var iconStyle = new olStyleStyle({
-      image: new olStyleIcon(/** @type {olx.style.IconOptions} */ ({
-        anchor: [0.5, 0.5],
-        anchorXUnits: 'fraction',
-        anchorYUnits: 'pixels',
-        opacity: 0.75,
-        scale: 0.1,
-        src:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Map_marker_font_awesome.svg/200px-Map_marker_font_awesome.svg.png',
-      }))
-    });
-    var markerVectorLayer = new OlLayerVector({
-      source: vectorSource,
-      style: iconStyle
-    });
-    this.olmap.addLayer(markerVectorLayer);
-  }    
+    else if (nextProps.hovered) {
+      console.log('need to unhover this', nextProps.hovered);
+      this.olmap.getLayers().forEach(layer => {
+        if (layer.get('title') == 'markers') {
+          var iconStyle = new olStyleStyle({
+            image: new olStyleIcon(/** @type {olx.style.IconOptions} */ ({
+              anchor: [0.5, 0.5],
+              anchorXUnits: 'fraction',
+              anchorYUnits: 'pixels',
+              opacity: 0.75,
+              scale: 0.13,
+              src:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Map_marker_font_awesome.svg/200px-Map_marker_font_awesome.svg.png',
+            }))
+          });
+          const source = layer.getSource();
+          const feature = source.getFeatureById(nextProps.hovered);
+          feature.setStyle(iconStyle);
+        }
+      });
+    }   
   }
   
   //everytime state/prop change
   shouldComponentUpdate(nextProps, nextState) {
     if (this.props.searchCoordinates !== nextProps.searchCoordinates) return true;
     if (this.props.listings !== nextProps.listings) return true;
+    if (this.props.hovered !== nextProps.hovered) return true;
+    if(this.props.selected !== nextProps.selected) return true;
     let center = this.olmap.getView().getCenter();
     let zoom = this.olmap.getView().getZoom();
     if (center === nextState.center && zoom === nextState.zoom) return false;

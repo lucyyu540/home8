@@ -8,14 +8,18 @@ import SearchMap from './searchMap'
 
 import '../App.css'
 export default function Landing() {
-    const[listings, setListings] = React.useState();
-    const[favoriteListings, setFavoriteListings] = React.useState();
+    const[listings, setListings] = React.useState(null);
+    const[favoriteListings, setFavoriteListings] = React.useState(null);
     const [range, setRange] = React.useState([0,0,0,0]);
     const [readyAPI, setReadyAPI] = React.useState(false);
     function updateRange(value) {
         setRange(value);
         setReadyAPI(true);
     }
+    const [selected, setSelected] = React.useState(null);
+    const [hovered, setHovered] = React.useState(null);
+    function updateSelected(value) {setSelected(value);}
+    function updateHovered(value) {setHovered(value);}
   const { getTokenSilently, user } = useAuth0();
   /**API CALLS */
   const getCustomListings = async (range) => {
@@ -80,17 +84,23 @@ export default function Landing() {
 
   console.log(range);
   console.log(listings);
+  console.log(selected);
+  console.log(hovered);
 
 
     return( 
         <div className='rowC'>
             <SearchMap 
-            updateRange={updateRange}
+            updateRange={updateRange}//function for child
             listings={listings}
+            selected={selected}
+            hovered={hovered}
             />
             <ListingResults 
             listings={listings}
             favoriteListings = {favoriteListings}
+            updateHovered = {updateHovered}
+            updateSelected = {updateSelected}
             />
         </div>
     );
