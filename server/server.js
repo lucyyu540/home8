@@ -8,6 +8,7 @@ const privateRouter = require('./routes/private');
 const db = require('./db/index');
 const users = require('./db/table/users')
 const favoriteListings = require('./db/table/favoriteListings')
+const personalityAs = require('./db/table/personalityAs');
 
 
 /**MODULES */
@@ -51,10 +52,11 @@ async function checkUsers(req, res, next) {
 		try {
 			const user = await users.createNewUser(userid, email, username);
 			const favorites = await favoriteListings.createNewUser(userid);
+			const answers = await personalityAs.createNewUser(userid);
 			next();
 		}
 		catch(err) {
-			res.json('user not in mysql and cannot create new user');
+			res.json(err);
 		}
 	}
 }

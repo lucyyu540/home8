@@ -201,22 +201,43 @@ export default function ListingResults(props) {
         <DialogTitle id="scroll-dialog-title">
           {listings[ind].roomType} {listings[ind].bed}bed{listings[ind].bath}bath
         </DialogTitle>
+        <DialogContent>{listings[ind].address}</DialogContent>
+        <DialogContent> Roomates: </DialogContent>
+        <DialogContent>${listings[ind].price}</DialogContent>
         <DialogContent dividers>
-        <div>{listings[ind].address}</div>
-        <div>Roomates: </div>
-        <div>${listings[ind].price}</div>
           <DialogContentText
             id="scroll-dialog-description"
+            tabIndex={-1}
           >
-            {listings[ind].description}
-            Building: {listings[ind].building}
-            Laundry: {listings[ind].laundry}
-
+            {listings[ind].description}            
           </DialogContentText>
+          <DialogContentText
+            id="scroll-dialog-description"
+            tabIndex={-1}
+          >
+            Building: {listings[ind].building}
+          </DialogContentText>
+          <DialogContentText
+            id="scroll-dialog-description"
+            tabIndex={-1}
+          >
+            Laundry: {listings[ind].laundry}
+          </DialogContentText>
+          {listings[ind].doorman && (
+            <DialogContentText
+            id="scroll-dialog-description"
+            tabIndex={-1}
+          >
+            Doorman
+          </DialogContentText>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
             Request
+          </Button>
+          <Button onClick={handleClose} color="primary">
+            Favorite
           </Button>
           <Button onClick={handleClose} color="primary">
             Close

@@ -23,7 +23,15 @@ const theme = createMuiTheme({
       tonalOffset: 0.2,
       primaryText: {
         main: '#6FB2E3',
+      },
+      text: {
+        primary: '#fff',
+        tertiary:'#8DCCA2'
+      },
+      paper: {
+        secondary:'#29465c'
       }
+
     },
   });
   export default theme;

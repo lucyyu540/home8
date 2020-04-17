@@ -35,7 +35,6 @@ const useStyles = makeStyles((theme) => ({
       padding: theme.spacing(2),
       textAlign: 'center',
       paddingBottom: 50,
-      flexGrow:1,
       overflow: 'auto',
     },
     button: {

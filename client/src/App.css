@@ -63,8 +63,22 @@
   font-family: BethanWhite;
   src: url("./fonts/BethanWhite.ttf") /* TTF file for CSS3 browsers */
  }
+ @font-face {
+  font-family: digit;
+  src: url("./fonts/DS-DIGIT.TTF") /* TTF file for CSS3 browsers */
+ }
  
  .name {
-   font-family: BethanWhite;
-   font-size: 14vw;
+   font-family: England;
+   font-size: 150px;
  }
+ .England{
+  font-family: England;
+  font-size: 50px;
+
+ }
+ .number {
+   font-family: digit;
+   font-size: 6vw;
+ }
+ 

@@ -17,20 +17,26 @@ import EditIcon from '@material-ui/icons/Edit';
 const useStyles = makeStyles((theme) => ({
     root: {
       flexGrow: 1,
-      overflow: 'scroll',
     },
     paper: {
-      maxWidth: 350,
+      width: 350,
       margin: `${theme.spacing(4)}px`,
-      marginRight: 'auto',
       padding: theme.spacing(2),
+      overflow: 'auto',
+    },
+    secondPaper: {
+      padding: theme.spacing(2),
+      //backgroundColor: '#232324',
+      display: 'flex',
+      width: 250
     },
     list: {
+        alignItems:'center',
         textAlign:'center'
     },
     button: {
       float: 'right'
-    }
+    },
   }));
   
 
@@ -81,7 +87,6 @@ export default function Profile(props){
     if (username) getProfile(username);
   }, [loading] )
   console.log(thisUser);
-  console.log(props.match);
   
 
 
@@ -102,11 +107,16 @@ export default function Profile(props){
           )}
           <List className={classes.list}>
             <div className='name'> @{thisUser.username}</div>
-            <Divider/>
-            <ListItem item>Name: {thisUser.firstName } {thisUser.lastName } </ListItem>
-            <ListItem item>Date of Birth: {thisUser.dob}</ListItem>
-            <ListItem item>Gender: {thisUser.gender}</ListItem>
-            <ListItem item>Nationality: {thisUser.nationality}</ListItem>
+            <ListItem>
+            <Paper variant="outlined" square className={classes.secondPaper}>
+              <List className={classes.list}>
+                <ListItem >{thisUser.firstName } {thisUser.lastName }</ListItem>
+                <ListItem >{thisUser.dob}</ListItem>
+                <ListItem >Gender: {thisUser.gender}</ListItem>
+                <ListItem >Nationality: {thisUser.nationality}</ListItem>
+              </List>
+            </Paper>
+            </ListItem>
           </List>
         </Paper>
 

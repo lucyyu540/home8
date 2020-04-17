@@ -4,7 +4,8 @@ const router = express.Router();
 const users = require('../db/table/users')
 const listings = require('../db/table/listings')
 const favoriteListings = require('../db/table/favoriteListings');
-
+const personalityAs = require('../db/table/personalityAs');
+const personalityQs = require('../db/table/personalityQs');
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 router.put('/listings',  async (req,res) => {
     const userid = req.user.sub;
@@ -84,11 +85,71 @@ router.put('/edit-profile', async (req, res) => {
         res.json(err);
     }
 });
+router.get('/get-question', async (req, res) => {
+    console.log('endpoint /private/get-question')
+    const userid = req.user.sub;
+    var result = 'before try';
+    try {
+        const x = await personalityAs.getX(userid);
+        const n = await personalityQs.getSize();
+        if (x > n) {
+            result = {
+                qTemp: { question: 'Completed all questions! Please come back later.'},
+                x : x,
+                n: n,
+            }
+            console.log(result);
+            return res.json(result);
+        }
+        const qTemp = await personalityQs.getQuestionByQid(x);
+        result = {
+            qTemp: qTemp,
+            x: x,
+            n: n
+        }
+        console.log(result);
+        res.json(result);
+    }
+    catch (err) {
+        console.log(err);
+        res.json(err);
+    }
+});
+
+router.put('/compare', async (req,res) => {
+    const me = req.user.sub;
+    try {
+        const you = await users.getUsernameByUserid(req.body.username);
+        const myAs = await personalityAs.getAnswersByUserid(me);
+        const yourAs = await personalityAs.getAnswersByUserid(you);
+        const similarity = euclideanDistance(myAs, yourAs);
+        res.json(similarity);
+    }
+    catch(err) {
+        res.json(err);
+    }
+});
+
+router.put('/submit-answer', async (req, res) => {
+    const userid = req.user.sub;
+    console.log('endpoint private/submit-answer', userid);
+    console.log(req.body);
+    try {
+        const result = await personalityAs.putAnswer(userid, req.body.qid, parseInt(req.body.ans));
+        console.log(result);
+        res.end();
+    }
+    catch(err) {
+        console.log(err);
+        res.json(err);
+    }
+})
+
 
 function euclideanDistance(A, B) {
     var sum = 0;
     var maxDistance = 0;
-    for (var i = 0 ; i < A.length; i ++) {
+    for (var i = 2 ; i < A.length; i ++) {
         if (A[i] || B[i]) break;
         sum += Math.pow(A[i] - B[i], 2);//(a-b)^2
         maxDistance += 16;
