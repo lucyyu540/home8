@@ -1,6 +1,7 @@
 import React, { useEffect }  from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { useAuth0, user } from "../react-auth0-spa";
+import { Link } from "react-router-dom";
 
 /**LIST */
 import List from '@material-ui/core/List';
@@ -8,10 +9,15 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import MenuItem from '@material-ui/core/MenuItem';
-
+/**ICONS */
+import Divider from '@material-ui/core/Divider';
+/**MAP */
 import Geocode from "react-geocode";
 import {toLonLat, fromLonLat, transform} from 'ol/proj';
 /**MY MODULES */
@@ -19,11 +25,13 @@ import Submap from './submap';
 import '../App.css'
 import config from "../auth_config.json";
 import { add } from 'ol/coordinate';
+import { Button } from '@material-ui/core';
 
 /**SEARCH BY ADDRESS */
 Geocode.setApiKey(config.GOOGLE_API_KEY);
 Geocode.setLanguage("en");
 Geocode.enableDebug();
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -46,8 +54,14 @@ const useStyles = makeStyles((theme) => ({
   center: {
     textAlign: 'center'
   },
+  right: {
+    float:'right'
+  },
+  textPadding: {
+    padding: theme.spacing(2)
+  },
   form: {
-    padding: theme.spacing(5, 0, 0,5),
+    padding: theme.spacing(5, 5, 0,5),
   },
 }));
 //SELECT OPTIONS
@@ -123,6 +137,8 @@ export default function Listing(props) {
   const [rooming, setRooming] = React.useState(props.listing.rooming);
   const [disabled, setDisabled] = React.useState(true);
   const [change, setChange] = React.useState(false);
+  const [home8s, setHome8s] = React.useState(0);
+  const [active, setActive] = React.useState(1);
   useEffect(()=> {
     setAddress(props.listing.address);
     setAddressError(false);
@@ -145,6 +161,15 @@ export default function Listing(props) {
     setRooming(props.listing.rooming);
     setDisabled(true);
     setChange(false);
+    setActive(props.listing.active);
+    var c = 0;
+    if (props.listing.mate1 != null) c ++;
+    if (props.listing.mate2 != null) c ++;
+    if (props.listing.mate3 != null) c ++;
+    if (props.listing.mate4 != null) c ++;
+    if (props.listing.mate5 != null) c ++;
+    if (props.listing.mate6 != null) c ++;
+    setHome8s(c);
   }, [props.listing]);
 
   useEffect(() => {
@@ -250,6 +275,11 @@ export default function Listing(props) {
     setRooming(e.target.value);
     setChange(true);
   }
+  function changeActive(e) {
+    if (e.target.checked)setActive(1);
+    else setActive(0);
+    setChange(true);
+  }
   async function submit() {
     console.log('save clicked');
     if (props.listing.lid) update();
@@ -274,7 +304,8 @@ export default function Listing(props) {
         bed: bed,
         bath: bath,
         roomType: roomType,
-        rooming:rooming
+        rooming:rooming,
+        active: active
       }
       const response = await fetch(`https://localhost:3000/private/create-listing`, {
           headers: {
@@ -311,7 +342,8 @@ export default function Listing(props) {
         bed: bed,
         bath: bath,
         roomType: roomType,
-        rooming:rooming
+        rooming:rooming,
+        active: active
       }
       const response = await fetch(`https://localhost:3000/private/update-listing`, {
           headers: {
@@ -332,6 +364,35 @@ export default function Listing(props) {
     <div className={classes.root}>
     <Submap coordinates={[longitude,latitude]} />
     <List className={classes.form}>
+
+      <List className={classes.right}>
+      <ListItem>
+      <ListItemText className={classes.textPadding}>
+        {active==1 && (<Typography color='secondary'> Deactivate</Typography>)}
+        {active==0 && (<Typography color='textSecondary'> Activate</Typography>)}
+        
+      </ListItemText>
+      <FormControlLabel
+        control={
+          <Switch
+            checked={active}
+            onChange={changeActive}
+            color="secondary"
+          />
+        }
+      />
+      </ListItem>
+      </List>
+
+      <ListItem>
+        {props.listing.mate1 && (<Button component={Link} to={`/${props.listing.mate1[1]}`} key={'Profile'}>{props.listing.mate1[1]}</Button>)}
+        {props.listing.mate2 && (<Button>{props.listing.mate2[1]}</Button>)}
+        {props.listing.mate3 && (<Button>{props.listing.mate3[1]}</Button>)}
+        {props.listing.mate4 && (<Button>{props.listing.mate4[1]}</Button>)}
+        {props.listing.mate5 && (<Button>{props.listing.mate5[1]}</Button>)}
+        {props.listing.mate6 && (<Button>{props.listing.mate6[1]}</Button>)}
+      </ListItem>
+      <Divider/>
         <ListItem>
         {/**Address */}
         <TextField

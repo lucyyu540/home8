@@ -73,7 +73,7 @@ db.getUserIdByEmail = (email) => {
 }
 db.createNewUser = (userid, email, username) => {
     return new Promise ((res, rej) => {
-        sql.query('INSERT INTO users (userid, email, username) VALUES (?)', [userid, email, username] , (err, results) => {
+        sql.query('INSERT INTO users (userid, email, username) VALUES (?)', [[userid, email, username]] , (err, results) => {
             if (err) return rej(err);
             return res(results[0]);
         })

@@ -65,7 +65,9 @@ export default function ListingResults() {
         bed:'',
         bath: '',
         roomType:'',
-        rooming:''}
+        rooming:'',
+        active: 1
+      }
       listings.push(newListing);
     }
   }

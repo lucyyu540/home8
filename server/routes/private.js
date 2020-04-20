@@ -54,6 +54,15 @@ router.get('/my-listings', async (req, res) => {
     console.log('endpoint: private/my-listings', userid);
     try {
         const results = await listings.getListingsByUserid(userid);
+        for (var i = 0 ; i < results.length ; i ++) {
+            for (var j = 1 ; j < 6; j ++) {
+                var mate = 'mate'+j;
+                if (results[i][mate] !== null){
+                const temp = await users.getUsernameByUserid(results[i][mate]);
+                results[i][mate] = [results[i][mate], temp];
+                }
+            }
+        }
         console.log(results);
         res.json(results);
     }
@@ -73,7 +82,6 @@ router.put('/create-listing', async (req, res) => {
         description: req.body.description,
         price: parseFloat(req.body.price),
         count: parseInt(req.body.count),
-        active: 1,
         doorman: parseInt(req.body.doorman),
         building: req.body.building,
         laundry: req.body.laundry,
@@ -82,7 +90,8 @@ router.put('/create-listing', async (req, res) => {
         roomType: req.body.roomType,
         rooming: req.body.rooming,
         fromDate: req.body.fromDate,
-        toDate: req.body.toDate
+        toDate: req.body.toDate,
+        active: parseInt(req.body.active)
     }
     try {
         const result = await listings.createListing(data);
