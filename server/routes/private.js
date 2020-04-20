@@ -49,6 +49,51 @@ router.put('/listings',  async (req,res) => {
         console.log('the error',err);
     }   
 })
+router.get('/my-listings', async (req, res) => {
+    const userid = req.user.sub;
+    console.log('endpoint: private/my-listings', userid);
+    try {
+        const results = await listings.getListingsByUserid(userid);
+        console.log(results);
+        res.json(results);
+    }
+    catch(err) {
+        console.log(err);
+        res.json(err);
+    }
+})
+router.put('/create-listing', async (req, res) => {
+    const userid = req.user.sub;
+    console.log('endpoint: private/create-listing' , userid);
+    const data = {
+        owner: userid,
+        address: req.body.address,
+        longitude: parseFloat(req.body.longitude),
+        latitude: parseFloat(req.body.latitude),
+        description: req.body.description,
+        price: parseFloat(req.body.price),
+        count: parseInt(req.body.count),
+        active: 1,
+        doorman: parseInt(req.body.doorman),
+        building: req.body.building,
+        laundry: req.body.laundry,
+        bed: parseInt(req.body.bed),
+        bath: parseInt(req.body.bath),
+        roomType: req.body.roomType,
+        rooming: req.body.rooming,
+        fromDate: req.body.fromDate,
+        toDate: req.body.toDate
+    }
+    try {
+        const result = await listings.createListing(data);
+        console.log(result);
+        res.end();
+    }
+    catch(err) {
+        console.log(err);
+        res.end();
+    }
+})
 /**PRIVATE PROFILE GIVEN USERNAME */
 router.put('/my-profile', async (req, res) => {
     const userid = req.user.sub;

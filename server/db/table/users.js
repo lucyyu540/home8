@@ -6,7 +6,7 @@ db.updateUserByUserid = (firstName, lastName, dob, phone, nationality, gender, g
         sql.query('UPDATE users SET firstName = ?, lastName = ?, dob = ?, phone = ?, nationality = ?, gender = ?, genderPreference = ? WHERE userid = ?', 
         [firstName, lastName, dob, phone, nationality, gender, genderPreference, userid] , (err, results) => {
             if (err) return rej(err);
-            return res(results[0]);
+            return res(results);
         })
     })
 
@@ -86,7 +86,7 @@ db.updateUsername = (id, username) => {
                 console.log(err);
                 return rej(err);
             }
-            return res(results[0]);
+            return res(results);
         })
     })
 }

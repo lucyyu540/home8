@@ -33,6 +33,10 @@ class Map extends Component {
     })
     feature.setStyle(iconStyle)
     vectorSource.addFeature(feature);
+    var markerLayer = new OlLayerVector({
+      title: 'markers',
+      source: vectorSource,
+    });
 
     this.map = new OlMap({
       target: null,
@@ -40,9 +44,7 @@ class Map extends Component {
         new OlLayerTile({
           source: new OlSourceOSM()
         }),
-        new OlLayerVector({
-            source: vectorSource,
-        })//base map layer
+        markerLayer
       ],
       view: new OlView({
         center: this.state.center,
@@ -68,9 +70,22 @@ class Map extends Component {
       this.setState({ center, zoom });
     });
   }
+  componentDidUpdate(nextProps, prevState) {
+    this.map.getLayers().forEach(layer => {
+      if (layer.get('title') == 'markers') {
+        const source = layer.getSource();
+        const feature = source.getFeatures()[0].setGeometry(new OlGeometryPoint(this.props.coordinates));
+      }
+    });
+    if (this.props.coordinates != nextProps.coordinates) {
+      const center = this.props.coordinates
+      this.setState({ center: center, zoom: 14 });
+    }
+  }
   
   //everytime state/prop change
   shouldComponentUpdate(nextProps, nextState) {
+    if (this.props.coordinates !== nextProps.coordinates) return true;
     let center = this.map.getView().getCenter();
     let zoom = this.map.getView().getZoom();
     if (center === nextState.center && zoom === nextState.zoom) return false;

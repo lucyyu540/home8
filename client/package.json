@@ -16,6 +16,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-geocode": "^0.2.1",
+    "react-google-autocomplete": "^1.1.4",
     "react-native": "*",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",

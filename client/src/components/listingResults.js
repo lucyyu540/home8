@@ -72,14 +72,15 @@ export default function ListingResults(props) {
   /**HANDLE SELECTED LISTING */
   const [on, setOn] = React.useState(false);
   const [ind, setInd] = React.useState(null);
-  function handleClickOpen(e){
-    console.log('clicked a listing', listings[e].lid);
-    props.updateSelected(listings[e].lid);
-    setInd(e);
+  function handleClickOpen(i){
+    console.log('clicked a listing', listings[i].lid);
+    props.updateSelected(listings[i].lid);
+    setInd(i);
     setOn(true);
   }
   function handleClose() {
     setOn(false);
+    setInd(null);
   }
   
   
@@ -123,7 +124,7 @@ export default function ListingResults(props) {
             <Grid item xs container direction="column" spacing={2}>
               <Grid item xs>
                 <Typography gutterBottom variant="subtitle1">
-                {listings[index].roomType} {listings[index].bed}bed{listings[index].bath}bath
+                {listings[index].roomType} {listings[index].rooming} {listings[index].bed}bed{listings[index].bath}bath
                 </Typography>
                 <Typography 
                   variant="body2" 

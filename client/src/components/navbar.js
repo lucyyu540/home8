@@ -123,12 +123,14 @@ export default function NavBar() {
     {isAuthenticated && (<Divider />)}
     {isAuthenticated &&(
        <List>
-         {['My rooms', 'My listings'].map((text, index) => (
-           <ListItem button key={text}>
-             <ListItemIcon>{<ListIcon />}</ListItemIcon>
-             <ListItemText primary={text} />
-           </ListItem>
-         ))}
+         <ListItem button component={Link} to='/' key={'MyHomes'}>
+            <ListItemIcon><ListIcon /></ListItemIcon>
+            <ListItemText primary={'My homes'} />
+          </ListItem>
+          <ListItem button component={Link} to='/my-listings' key={'MyListings'}>
+            <ListItemIcon><ListIcon /></ListItemIcon>
+            <ListItemText primary={'My listings'} />
+          </ListItem>
        </List>
     )}
     {isAuthenticated && (<Divider />)}

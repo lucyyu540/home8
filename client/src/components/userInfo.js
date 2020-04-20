@@ -1,4 +1,4 @@
-import React, { Fragment , useEffect} from "react";
+import React, {useEffect} from "react";
 import { useAuth0 } from "../react-auth0-spa";
 import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
@@ -26,17 +26,18 @@ const useStyles = makeStyles((theme) => ({
     },
     secondPaper: {
       padding: theme.spacing(2),
-      //backgroundColor: '#232324',
       display: 'flex',
       width: 250
     },
     list: {
         alignItems:'center',
-        textAlign:'center'
+        textAlign:'center',
+        justifyContent: 'center',
     },
-    button: {
-      float: 'right'
+    rightAlign: {
+      textAlign:'right'
     },
+
   }));
   
 
@@ -97,19 +98,22 @@ export default function Profile(props){
     <div className={classes.root}> 
         <Paper className={classes.paper}>
           {isAuthenticated && user.nickname === username && (
-          <Button
-            variant="contained"
+          <div className={classes.rightAlign}>
+            <Button
             color="primary"
-            className={classes.button}
             startIcon={<EditIcon/>}
-            size="small"
-            component={Link} to={`/${user.nickname}/edit`}>Edit</Button>
+            className={classes.button}
+            component={Link} to={`/${user.nickname}/edit`}
+            >
+              Edit
+            </Button>
+          </div>  
           )}
           <List className={classes.list}>
             <div className='name'> @{thisUser.username}</div>
-            <ListItem>
+            <ListItem className={classes.list}>
             <Paper variant="outlined" square className={classes.secondPaper}>
-              <List className={classes.list}>
+              <List >
                 <ListItem >{thisUser.firstName } {thisUser.lastName }</ListItem>
                 <ListItem >{thisUser.dob}</ListItem>
                 <ListItem >Gender: {thisUser.gender}</ListItem>
@@ -122,7 +126,7 @@ export default function Profile(props){
 
         <Paper className={classes.paper}>
           <List  className={classes.list}>
-            <ListItem>Load Private information here</ListItem>
+            <ListItem>Load Review</ListItem>
           </List>
         </Paper>
     </div>

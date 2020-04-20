@@ -11,6 +11,7 @@ import Profile from './components/profile';
 import Inbox from './components/inbox'
 import history from "./utils/history";
 import EditProfile from './components/editProfile'
+import MyListings from "./components/myListings"
 
 /**STYLE*/
 import './App.css';
@@ -28,9 +29,10 @@ function App() {
         <Navbar />
         <Switch>
           <Route exact path='/' component = {LandingPage}/>
-          <Route exact path="/:username" component={Profile} />
           <PrivateRoute path="/inbox" component={Inbox} />
-          <PrivateRoute path="/:username/edit" component={EditProfile} />
+          <PrivateRoute exact path="/:username/edit" component={EditProfile} />
+          <PrivateRoute exact path="/my-listings" component={MyListings} />
+          <Route exact path="/:username" component={Profile} />
         </Switch>
       </Router>
       
