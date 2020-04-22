@@ -2,21 +2,38 @@ import React, { useEffect }  from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { useAuth0, user } from "../react-auth0-spa";
 import { Link } from "react-router-dom";
+import Box from '@material-ui/core/Box';
+import Snackbar from '@material-ui/core/Snackbar';
+
 
 /**LIST */
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
-
+/**FORM */
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import MenuItem from '@material-ui/core/MenuItem';
+
+/**DIALOG */
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+
 /**ICONS */
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import IconButton from '@material-ui/core/IconButton';
 import Divider from '@material-ui/core/Divider';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import CheckIcon from '@material-ui/icons/Check';
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import { Button } from '@material-ui/core';
 /**MAP */
 import Geocode from "react-geocode";
 import {toLonLat, fromLonLat, transform} from 'ol/proj';
@@ -25,7 +42,6 @@ import Submap from './submap';
 import '../App.css'
 import config from "../auth_config.json";
 import { add } from 'ol/coordinate';
-import { Button } from '@material-ui/core';
 
 /**SEARCH BY ADDRESS */
 Geocode.setApiKey(config.GOOGLE_API_KEY);
@@ -48,6 +64,9 @@ const useStyles = makeStyles((theme) => ({
     smallTextField: {
         width: '20ch',
     },
+    numberTextField: {
+      width: '10ch'
+    },
   button: {
     padding: theme.spacing(4),
   },
@@ -55,7 +74,10 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center'
   },
   right: {
-    float:'right'
+    float:'right',
+  },
+  left:{
+    float:'left'
   },
   textPadding: {
     padding: theme.spacing(2)
@@ -63,6 +85,10 @@ const useStyles = makeStyles((theme) => ({
   form: {
     padding: theme.spacing(5, 5, 0,5),
   },
+  box: {
+    margin: theme.spacing(1),
+    padding: theme.spacing(0,1),
+  }
 }));
 //SELECT OPTIONS
 const doormanOptions = [
@@ -136,9 +162,9 @@ export default function Listing(props) {
   const [roomType, setRoomType] = React.useState(props.listing.roomType);
   const [rooming, setRooming] = React.useState(props.listing.rooming);
   const [disabled, setDisabled] = React.useState(true);
-  const [change, setChange] = React.useState(false);
-  const [home8s, setHome8s] = React.useState(0);
+  const[mates, setMates] = React.useState([]);
   const [active, setActive] = React.useState(1);
+
   useEffect(()=> {
     setAddress(props.listing.address);
     setAddressError(false);
@@ -160,32 +186,25 @@ export default function Listing(props) {
     setRoomType(props.listing.roomType);
     setRooming(props.listing.rooming);
     setDisabled(true);
-    setChange(false);
     setActive(props.listing.active);
-    var c = 0;
-    if (props.listing.mate1 != null) c ++;
-    if (props.listing.mate2 != null) c ++;
-    if (props.listing.mate3 != null) c ++;
-    if (props.listing.mate4 != null) c ++;
-    if (props.listing.mate5 != null) c ++;
-    if (props.listing.mate6 != null) c ++;
-    setHome8s(c);
+    if (props.listing.mates != null) setMates(props.listing.mates.slice(0,props.listing.mates.length))
+    else setMates([]);
   }, [props.listing]);
 
-  useEffect(() => {
-    if (change) {
-      saveChanges();
-      setChange(false);
-    }
-  },[change])
-  function saveChanges() {
+  console.log('number of mates', mates.length);
+
+
+  function checkChanges(v, e) {
+    if (v == "" ) return setDisabled(true);
+    if (e) return setDisabled(true);
+    openSnackbar();
     if (address == "") setDisabled(true);
     else if (fromDate == "" || fromDate == null) setDisabled(true);
     else if (toDate == "" || toDate == null ) setDisabled(true);
     else if (price == "" || price == null) setDisabled(true);
     else if (count == "" || count == null) setDisabled(true);
     else if (building == ""|| building == null ) setDisabled(true);
-    else if (doorman == "" || doorman == null) setDisabled(true);
+    else if (doorman != 0 && doorman != 1) setDisabled(true);
     else if (laundry == "" || laundry == null) setDisabled(true);
     else if (bed == "" || bed == null) setDisabled(true);
     else if (bath == ""|| bath == null ) setDisabled(true);
@@ -195,10 +214,9 @@ export default function Listing(props) {
     else setDisabled(false);
   }
 
-
   function changeAddress(e) {
     setAddress(e.target.value);
-    if (e.target.value == "") setAddressError(true); //cannot be empty
+    if (e.target.value == "") setAddressError(true); 
     else {
     Geocode.fromAddress(e.target.value).then(
       response => {
@@ -212,22 +230,23 @@ export default function Listing(props) {
       error => {//invalid address
         console.error(error);
         setAddressError(true);
+        return checkChanges(error, true);
       }
     );
     }
-    setChange(true);
+    checkChanges(e.target.value);
   }
   function changeDescription(e) {
     setDescription(e.target.value);
-    setChange(true);
+    checkChanges()
   }
   function changeFromDate(e) {
     setFromDate(e.target.value);
-    setChange(true);
+    checkChanges()
   }
   function changeToDate(e) {
     setToDate(e.target.value);
-    setChange(true);  
+    checkChanges() 
   }
   function changePrice(e) {
     console.log(e.target.value);
@@ -239,47 +258,77 @@ export default function Listing(props) {
       const temp = e.target.value.split(".");
       if (temp.length == 1) setPrice(e.target.value); //no decimal
       else if (temp[1].length <= 2) setPrice(e.target.value);//no more than 2 dec places
-      setPriceError(false);
+      if (e.target.value == "" || e.target.value == null) setPriceError(true);
+      else setPriceError(false);
+      checkChanges(e.target.value);
     }
-    setChange(true);
   }
   function changeCount(e) {
     setCount(e.target.value);
-    setChange(true);
+    checkChanges()
   }
   function changeBuilding(e) {
     setBuilding(e.target.value);
-    setChange(true);
+    checkChanges()
   }
   function changeDoorman(e) {
     setDoorman(e.target.value);
-    setChange(true);
+    checkChanges()
   }
   function changeLaundry(e) {
     setLaundry(e.target.value);
-    setChange(true);
+    checkChanges()
   }
   function changeBed(e) {
     setBed(e.target.value);
-    setChange(true);
+    checkChanges()
   }
   function changeBath(e) {
     setBath(e.target.value);
-    setChange(true);
+    checkChanges()
   }
   function changeRoomType(e) {
     setRoomType(e.target.value);
-    setChange(true);
+    checkChanges()
   }
   function changeRooming(e) {
     setRooming(e.target.value);
-    setChange(true);
+    checkChanges()
   }
   function changeActive(e) {
     if (e.target.checked)setActive(1);
     else setActive(0);
-    setChange(true);
+    checkChanges()
   }
+  /**EDIT MATES */
+  function addMe() {
+    var temp = mates;
+    temp.unshift([user.sub, user.nickname]);
+    setMates(temp);
+    checkChanges();
+  }
+  function deleteMate(m) {
+    var temp = mates;
+    temp.splice(m,1);
+    setMates(temp);
+    checkChanges();
+  }
+  /**SNACKBAR */
+  const [snackbar, setSnackbar] = React.useState({
+    open: false,
+    vertical: 'bottom',
+    horizontal: 'center',
+  });
+  const { vertical, horizontal, open } = snackbar;
+  const openSnackbar = () => {
+    setSnackbar({...snackbar, open: true });
+  };
+
+  const closeSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  /**API CALLS */
   async function submit() {
     console.log('save clicked');
     if (props.listing.lid) update();
@@ -305,7 +354,8 @@ export default function Listing(props) {
         bath: bath,
         roomType: roomType,
         rooming:rooming,
-        active: active
+        active: active,
+        mates: mates
       }
       const response = await fetch(`https://localhost:3000/private/create-listing`, {
           headers: {
@@ -343,7 +393,8 @@ export default function Listing(props) {
         bath: bath,
         roomType: roomType,
         rooming:rooming,
-        active: active
+        active: active,
+        mates: mates
       }
       const response = await fetch(`https://localhost:3000/private/update-listing`, {
           headers: {
@@ -359,41 +410,79 @@ export default function Listing(props) {
       console.log(err);
     }
   }
-  console.log(props.listing);
+
   return (
     <div className={classes.root}>
+      <Snackbar
+        anchorOrigin={{ vertical, horizontal }}
+        key={`${vertical},${horizontal}`}
+        open={snackbar.open}
+        onClose={closeSnackbar}
+        message="Please save changes!"
+      />
     <Submap coordinates={[longitude,latitude]} />
     <List className={classes.form}>
-
+    <Typography variant="body2"color='textSecondary' >
+       id: {props.listing.lid}
+    </Typography>
       <List className={classes.right}>
       <ListItem>
-      <ListItemText className={classes.textPadding}>
-        {active==1 && (<Typography color='secondary'> Deactivate</Typography>)}
-        {active==0 && (<Typography color='textSecondary'> Activate</Typography>)}
-        
-      </ListItemText>
-      <FormControlLabel
-        control={
+        <ListItemText className={classes.textPadding}>
+        {active==1 && (<Typography color='secondary'> Active</Typography>)}
+        {active==0 && (<Typography color='textSecondary'> Inactive</Typography>)} 
+        </ListItemText>
+        <FormControlLabel
+          control={
           <Switch
-            checked={active}
+            checked={active==1}
             onChange={changeActive}
             color="secondary"
           />
-        }
-      />
+          }
+        />
       </ListItem>
       </List>
-
+      <List className={classes.left}>
       <ListItem>
-        {props.listing.mate1 && (<Button component={Link} to={`/${props.listing.mate1[1]}`} key={'Profile'}>{props.listing.mate1[1]}</Button>)}
-        {props.listing.mate2 && (<Button>{props.listing.mate2[1]}</Button>)}
-        {props.listing.mate3 && (<Button>{props.listing.mate3[1]}</Button>)}
-        {props.listing.mate4 && (<Button>{props.listing.mate4[1]}</Button>)}
-        {props.listing.mate5 && (<Button>{props.listing.mate5[1]}</Button>)}
-        {props.listing.mate6 && (<Button>{props.listing.mate6[1]}</Button>)}
+        {/**Count */}
+        <TextField
+          id="count"
+          label="People"
+          variant="outlined"
+          select
+          value={count||''}
+          className={classes.numberTextField}
+          onChange={changeCount}
+          required
+            >{countOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                </MenuItem>
+            ))}
+        </TextField>
+      </ListItem>
+      </List>
+      
+      <ListItem>
+        {mates.length < count && 
+        !mates.find(owner => owner[0] == user.sub) &&
+        (
+          <Button color='primary'
+          startIcon={<AddCircleOutlineIcon />}
+          onClick={addMe}
+          >Add me! I live here</Button>
+        )}
+        {mates.map( (key,index) => ( 
+          <Box key={index} borderColor='text.secondary' border={1} borderRadius="borderRadius" className={classes.box}>
+          <Button color='primary' component={Link} to={`/${mates[index][1]}`} key={'Profile'}>{mates[index][1]}</Button>
+          <IconButton onClick={() => deleteMate(index)}><HighlightOffIcon color='primary'/></IconButton>
+          </Box>
+        ))
+        }
+
       </ListItem>
       <Divider/>
-        <ListItem>
+      <ListItem>
         {/**Address */}
         <TextField
           error={addressError}
@@ -465,23 +554,6 @@ export default function Listing(props) {
           required
             />
         </ListItem>
-        <ListItem>
-        {/**Count */}
-            <TextField
-          id="count"
-          label="Number of home8s"
-          variant="outlined"
-          select
-          value={count||''}
-          className={classes.smallTextField}
-          onChange={changeCount}
-          required
-            >{countOptions.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                </MenuItem>
-            ))}</TextField>
-        </ListItem>
        
     <ListItem>
     {/**building */}
@@ -507,7 +579,7 @@ export default function Listing(props) {
           select
           label="Doorman"
           variant="outlined"
-          value={doorman||''}
+          value={doorman||0}
           helperText='Please select'
           className={classes.smallTextField}
           onChange={changeDoorman}

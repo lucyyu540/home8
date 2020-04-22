@@ -35,7 +35,6 @@ const useStyles = makeStyles((theme) => ({
   },
   listItem : {
     margin: theme.spacing(2),
-    alignItems: 'left'
   },
 }));
 
@@ -47,29 +46,16 @@ export default function ListingResults() {
   /**HANDLE SELECTED LISTING */
   const [ind, setInd] = React.useState(null);
   function handleClickOpen(e){
-    console.log('clicked ', e);
     setInd(e);
     if (e == listings.length) {
       const newListing = {
-        address : '',
         longitude: 0,
         latitude: 0,
-        description : '',
-        fromDate : '',
-        toDate: '',
-        price: '',
-        count: '',
-        building:'',
-        doorman:'',
-        laundry:'',
-        bed:'',
-        bath: '',
-        roomType:'',
-        rooming:'',
         active: 1
       }
       listings.push(newListing);
     }
+    console.log(listings[e]);
   }
 
 
@@ -95,6 +81,7 @@ export default function ListingResults() {
       getMyListings();
   }, [user])
 
+  
   return (
     <div className='rowC'>
     <div className={classes.root}>
@@ -114,9 +101,15 @@ export default function ListingResults() {
                         {listings[index].address}
                     </Typography>
                 )}
-                {listings[index].active==0 &&(<Typography gutterBottom variant="subtitle1" color='textSecondary'>
+                {listings[index].active==0 &&(
+                <Typography gutterBottom variant="subtitle1" color='textSecondary'>
                     {listings[index].address}
                 </Typography>)}
+              </Grid>
+              <Grid item xs>
+                <Typography variant="body2"color='textSecondary' >
+                  id: {listings[index].lid}
+                </Typography>
               </Grid>
             </Grid>
             <Grid item>

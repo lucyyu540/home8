@@ -28,15 +28,13 @@ router.put('/listings',  async (req,res) => {
         for (var i = 0 ; i < results.length; i ++) {
             const owner = await users.getUsernameByUserid(results[i].owner);
             results[i].owner = [results[i].owner, owner];
-            for (var j = 1; j <= 6; j ++) {
-                var mate = 'mate'+j;
-                console.log(mate, results[i][mate]);
-                if (results[i][mate] !== null){
-                    console.log('fetching username');
-                    const temp = await users.getUsernameByUserid(results[i][mate]);
-                    results[i][mate] = [results[i][mate], temp];
-                    console.log(results[i][mate]);
+            if (results[i].mates) {
+                const arr = results[i].mates.split(" ");
+                for (var j = 0 ; j < arr.length; j ++) {
+                    const username = await users.getUsernameByUserid(arr[j]);
+                    arr[j] = [arr[j], username];
                 }
+                results[i].mates = arr;
             }
             const lid = 'lid'+results[i].lid;
             if (favorites[lid]) sorted.favorites.push(results[i]);
@@ -55,12 +53,13 @@ router.get('/my-listings', async (req, res) => {
     try {
         const results = await listings.getListingsByUserid(userid);
         for (var i = 0 ; i < results.length ; i ++) {
-            for (var j = 1 ; j < 6; j ++) {
-                var mate = 'mate'+j;
-                if (results[i][mate] !== null){
-                const temp = await users.getUsernameByUserid(results[i][mate]);
-                results[i][mate] = [results[i][mate], temp];
+            if (results[i].mates) {
+                const arr = results[i].mates.split(" ");
+                for (var j = 0 ; j < arr.length; j ++) {
+                    const username = await users.getUsernameByUserid(arr[j]);
+                    arr[j] = [arr[j], username];
                 }
+                results[i].mates = arr;
             }
         }
         console.log(results);
@@ -74,6 +73,11 @@ router.get('/my-listings', async (req, res) => {
 router.put('/create-listing', async (req, res) => {
     const userid = req.user.sub;
     console.log('endpoint: private/create-listing' , userid);
+    var mates = '';
+    for (var i = 0; i < req.body.mates.length; i ++) {
+        if (i == 0) mates = req.body.mates[0][0];
+        else mates += " " + req.body.mates[i][0];
+    }
     const data = {
         owner: userid,
         address: req.body.address,
@@ -91,7 +95,46 @@ router.put('/create-listing', async (req, res) => {
         rooming: req.body.rooming,
         fromDate: req.body.fromDate,
         toDate: req.body.toDate,
-        active: parseInt(req.body.active)
+        active: parseInt(req.body.active),
+        mates: mates
+    }
+    try {
+        const result = await listings.createListing(data);
+        console.log(result);
+        res.end();
+    }
+    catch(err) {
+        console.log(err);
+        res.end();
+    }
+})
+router.put('/update-listing', async (req, res) => {
+    const userid = req.user.sub;
+    console.log('endpoint: private/create-listing' , userid);
+    var mates = '';
+    for (var i = 0; i < req.body.mates.length; i ++) {
+        if (i == 0) mates = req.body.mates[0][0];
+        else mates += " " + req.body.mates[i][0];
+    }
+    const data = {
+        owner: userid,
+        address: req.body.address,
+        longitude: parseFloat(req.body.longitude),
+        latitude: parseFloat(req.body.latitude),
+        description: req.body.description,
+        price: parseFloat(req.body.price),
+        count: parseInt(req.body.count),
+        doorman: parseInt(req.body.doorman),
+        building: req.body.building,
+        laundry: req.body.laundry,
+        bed: parseInt(req.body.bed),
+        bath: parseInt(req.body.bath),
+        roomType: req.body.roomType,
+        rooming: req.body.rooming,
+        fromDate: req.body.fromDate,
+        toDate: req.body.toDate,
+        active: parseInt(req.body.active),
+        mates: mates
     }
     try {
         const result = await listings.createListing(data);

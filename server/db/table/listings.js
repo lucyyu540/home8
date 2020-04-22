@@ -45,12 +45,20 @@ db.createListing = (data) => {
         const rooming = data.rooming;
         const fromDate = data.fromDate;
         const toDate = data.toDate;
-        var q = 'INSERT INTO listings (owner, address, longitude, latitude, fromDate, toDate, price, count, building, doorman, laundry, bed, bath, roomType, rooming, active, description) VALUES (?)';
-        sql.query(q, [[owner, address, longitude, latitude, fromDate, toDate, price, count, building, doorman, laundry, bed, bath, roomType, rooming, active, description]], (err, results) => {
+        const mates = data.mates;
+        var q = 'INSERT INTO listings (owner, address, longitude, latitude, fromDate, toDate, price, count, building, doorman, laundry, bed, bath, roomType, rooming, active, description, mates) VALUES (?)';
+        sql.query(q, [[owner, address, longitude, latitude, fromDate, toDate, price, count, building, doorman, laundry, bed, bath, roomType, rooming, active, description, mates]], (err, results) => {
             if (err) return rej(err);
             return res(results);
         });
     })
 }
-
+db.updateListing = (data) => {
+    /**return new Promise ((res, rej) => {
+        sql.query('UPDATE listings SET x = ? WHERE userid = ?', [x, userid] , (err, results) => {
+            if (err) return rej(err);
+            return res(results);
+        })
+    })*/
+}
 module.exports = db;
