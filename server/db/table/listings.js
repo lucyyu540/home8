@@ -54,11 +54,35 @@ db.createListing = (data) => {
     })
 }
 db.updateListing = (data) => {
-    /**return new Promise ((res, rej) => {
-        sql.query('UPDATE listings SET x = ? WHERE userid = ?', [x, userid] , (err, results) => {
+    return new Promise ((res, rej) => {
+        console.log(data);
+        const lid = data.lid;
+        const description = data.description;
+        const address = data.address;
+        const longitude = data.longitude;
+        const latitude = data.latitude;
+        const price = data.price;
+        const count = data.count;
+        const active = data.active;
+        const doorman = data.doorman;
+        const building = data.building;
+        const laundry = data.laundry;
+        const bed = data.bed;
+        const bath = data.bath;
+        const roomType = data.roomType;
+        const rooming = data.rooming;
+        const fromDate = data.fromDate;
+        const toDate = data.toDate;
+        const mates = data.mates;
+        var set = ' SET description = ?, address = ?, longitude = ?, latitude = ?, price = ?, count = ?, active = ?, '
+        var set2 = 'doorman = ?, building = ?, laundry = ?, bed = ?, bath=?, roomType=?, rooming = ?, fromDate=?, toDate=?, mates = ?'
+        var where = 'WHERE lid = ?'
+        sql.query('UPDATE listings'+ set + set2 + where , 
+        [description, address, longitude, latitude, price, count, active, doorman, building, laundry, bed, bath, roomType, rooming, fromDate, toDate, mates, lid], 
+        (err, results) => {
             if (err) return rej(err);
             return res(results);
         })
-    })*/
+    })
 }
 module.exports = db;

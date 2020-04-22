@@ -164,6 +164,7 @@ export default function Listing(props) {
   const [disabled, setDisabled] = React.useState(true);
   const[mates, setMates] = React.useState([]);
   const [active, setActive] = React.useState(1);
+  const [check, setCheck] = React.useState(false);
 
   useEffect(()=> {
     setAddress(props.listing.address);
@@ -189,12 +190,18 @@ export default function Listing(props) {
     setActive(props.listing.active);
     if (props.listing.mates != null) setMates(props.listing.mates.slice(0,props.listing.mates.length))
     else setMates([]);
+    setCheck(false);
   }, [props.listing]);
 
-
-  function checkChanges(v, e) {
-    if (v == "" ) return setDisabled(true);
-    if (e) return setDisabled(true);
+  useEffect(() => {
+    if(check) {
+    console.log('useeffect called for change');
+    checkChanges();
+    setCheck(false);
+    }
+  }, [check])
+  
+  function checkChanges() {
     if (address == "") setDisabled(true);
     else if (fromDate == "" || fromDate == null) setDisabled(true);
     else if (toDate == "" || toDate == null ) setDisabled(true);
@@ -226,27 +233,28 @@ export default function Listing(props) {
         setLatitude(coord[1]);
         console.log(longitude, latitude);
         setAddressError(false)
+        setCheck(true);
       },
       error => {//invalid address
         console.error(error);
         setAddressError(true);
-        return checkChanges(error, true);
+        setCheck(true);
       }
     );
     }
-    checkChanges(e.target.value);
+    setCheck(true);
   }
   function changeDescription(e) {
     setDescription(e.target.value);
-    checkChanges()
+    setCheck(true);
   }
   function changeFromDate(e) {
     setFromDate(e.target.value);
-    checkChanges()
+    setCheck(true);
   }
   function changeToDate(e) {
     setToDate(e.target.value);
-    checkChanges() 
+    setCheck(true);
   }
   function changePrice(e) {
     console.log(e.target.value);
@@ -262,56 +270,57 @@ export default function Listing(props) {
       else setPriceError(false);
       checkChanges(e.target.value);
     }
+    setCheck(true);
   }
   function changeCount(e) {
     setCount(e.target.value);
-    checkChanges()
+    setCheck(true);
   }
   function changeBuilding(e) {
     setBuilding(e.target.value);
-    checkChanges()
+    setCheck(true);
   }
   function changeDoorman(e) {
     setDoorman(e.target.value);
-    checkChanges()
+    setCheck(true);
   }
   function changeLaundry(e) {
     setLaundry(e.target.value);
-    checkChanges()
+    setCheck(true);
   }
   function changeBed(e) {
     setBed(e.target.value);
-    checkChanges()
+    setCheck(true);
   }
   function changeBath(e) {
     setBath(e.target.value);
-    checkChanges()
+    setCheck(true);
   }
   function changeRoomType(e) {
     setRoomType(e.target.value);
-    checkChanges()
+    setCheck(true);
   }
   function changeRooming(e) {
     setRooming(e.target.value);
-    checkChanges()
+    setCheck(true);
   }
   function changeActive(e) {
     if (e.target.checked)setActive(1);
     else setActive(0);
-    checkChanges()
+    setCheck(true);
   }
   /**EDIT MATES */
   function addMe() {
     var temp = mates;
     temp.unshift([user.sub, user.nickname]);
     setMates(temp);
-    checkChanges();
+    setCheck(true);
   }
   function deleteMate(m) {
     var temp = mates;
     temp.splice(m,1);
     setMates(temp);
-    checkChanges();
+    setCheck(true);
   }
   /**SNACKBAR */
   const [snackbar, setSnackbar] = React.useState({

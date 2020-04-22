@@ -110,21 +110,22 @@ router.put('/create-listing', async (req, res) => {
 })
 router.put('/update-listing', async (req, res) => {
     const userid = req.user.sub;
-    console.log('endpoint: private/create-listing' , userid);
+    console.log('endpoint: private/updates-listing' , userid);
+    console.log(req.body);
     var mates = '';
     for (var i = 0; i < req.body.mates.length; i ++) {
         if (i == 0) mates = req.body.mates[0][0];
         else mates += " " + req.body.mates[i][0];
     }
     const data = {
-        owner: userid,
+        lid: parseInt(req.body.lid),
         address: req.body.address,
         longitude: parseFloat(req.body.longitude),
         latitude: parseFloat(req.body.latitude),
         description: req.body.description,
         price: parseFloat(req.body.price),
         count: parseInt(req.body.count),
-        doorman: parseInt(req.body.doorman),
+        doorman: !!parseInt(req.body.doorman),
         building: req.body.building,
         laundry: req.body.laundry,
         bed: parseInt(req.body.bed),
@@ -133,11 +134,11 @@ router.put('/update-listing', async (req, res) => {
         rooming: req.body.rooming,
         fromDate: req.body.fromDate,
         toDate: req.body.toDate,
-        active: parseInt(req.body.active),
+        active: !!parseInt(req.body.active),
         mates: mates
     }
     try {
-        const result = await listings.createListing(data);
+        const result = await listings.updateListing(data);
         console.log(result);
         res.end();
     }
