@@ -136,7 +136,7 @@ class Map extends Component {
       });
     }
     //minimize previously hovered
-    else if (nextProps.hovered) {
+    if (nextProps.hovered && nextProps.hovered != this.props.hovered) {
       this.olmap.getLayers().forEach(layer => {
         if (layer.get('title') == 'markers') {
           var iconStyle = new olStyleStyle({

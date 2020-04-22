@@ -110,9 +110,9 @@ export default function ListingResults(props) {
               </ListItem>
             </React.Fragment>
           ))}
+          <ListSubheader className={classes.subheader}>Recent</ListSubheader>
           {listings.map( (key, index) => (
           <React.Fragment key={index}>
-          <ListSubheader className={classes.subheader}>Recent</ListSubheader>
           <ListItem 
             button
             onClick={() => handleClickOpen(index)}

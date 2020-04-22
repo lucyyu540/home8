@@ -191,13 +191,10 @@ export default function Listing(props) {
     else setMates([]);
   }, [props.listing]);
 
-  console.log('number of mates', mates.length);
-
 
   function checkChanges(v, e) {
     if (v == "" ) return setDisabled(true);
     if (e) return setDisabled(true);
-    openSnackbar();
     if (address == "") setDisabled(true);
     else if (fromDate == "" || fromDate == null) setDisabled(true);
     else if (toDate == "" || toDate == null ) setDisabled(true);
@@ -211,7 +208,10 @@ export default function Listing(props) {
     else if (roomType == "" || roomType == null) setDisabled(true);
     else if (rooming == ""|| rooming == null ) setDisabled(true);
     else if (addressError || priceError) return setDisabled(true);
-    else setDisabled(false);
+    else {
+      setDisabled(false);
+      openSnackbar();
+    }
   }
 
   function changeAddress(e) {
