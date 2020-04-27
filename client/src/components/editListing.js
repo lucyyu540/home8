@@ -4,6 +4,7 @@ import { useAuth0, user } from "../react-auth0-spa";
 import { Link } from "react-router-dom";
 import Box from '@material-ui/core/Box';
 import Snackbar from '@material-ui/core/Snackbar';
+import Paper from '@material-ui/core/Paper';
 
 
 /**LIST */
@@ -11,6 +12,8 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+
 /**FORM */
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -82,12 +85,19 @@ const useStyles = makeStyles((theme) => ({
   textPadding: {
     padding: theme.spacing(2)
   },
-  form: {
-    padding: theme.spacing(5, 5, 0,5),
+  body: {
+    padding: theme.spacing(5,5,0,5),
   },
   box: {
     margin: theme.spacing(1),
     padding: theme.spacing(0,1),
+  },
+  room: {
+    margin: theme.spacing(3),
+    padding: theme.spacing(2)
+  },
+  header: {
+    padding: theme.spacing(5)
   }
 }));
 //SELECT OPTIONS
@@ -144,51 +154,61 @@ const bathOptions = [
 export default function Listing(props) {
   const classes = useStyles();
   const { getTokenSilently, user } = useAuth0();
+
   const [address, setAddress] = React.useState(props.listing.address);
   const [addressError, setAddressError] = React.useState(false);
   const [longitude, setLongitude] = React.useState(0);
   const [latitude, setLatitude] = React.useState(0);
   const [description, setDescription] = React.useState(props.listing.description);
-  const [fromDate , setFromDate] = React.useState();
-  const [toDate , setToDate] = React.useState();
-  const [price, setPrice] = React.useState(props.listing.price);
-  const [priceError, setPriceError] = React.useState(false);
   const [count, setCount] = React.useState(props.listing.count);
   const [building, setBuilding] = React.useState(props.listing.building);
-  const [doorman, setDoorman] = React.useState(props.listing.doorman);
+  const [doorman, setDoorman] = React.useState('');
   const [laundry, setLaundry] = React.useState(props.listing.laundry);
   const [bed, setBed] = React.useState(props.listing.bed);
   const [bath, setBath] = React.useState(props.listing.bath);
-  const [roomType, setRoomType] = React.useState(props.listing.roomType);
-  const [rooming, setRooming] = React.useState(props.listing.rooming);
-  const [disabled, setDisabled] = React.useState(true);
-  const[mates, setMates] = React.useState([]);
   const [active, setActive] = React.useState(1);
+  const[mates, setMates] = React.useState([]);
+  /**IF ROOMS ARE UP FOR SALE */
+  const [fromDate , setFromDate] = React.useState([]);
+  const [toDate , setToDate] = React.useState([]);
+  const [price, setPrice] = React.useState([]);
+  const [priceError, setPriceError] = React.useState(false);
+  const [roomType, setRoomType] = React.useState([]);
+  const [rooming, setRooming] = React.useState([]);
+
+  const [disabled, setDisabled] = React.useState(true);  
   const [check, setCheck] = React.useState(false);
 
+  /**LOAD PROPS****************************************** */
   useEffect(()=> {
     setAddress(props.listing.address);
     setAddressError(false);
     setLongitude(props.listing.longitude);
     setLatitude(props.listing.latitude);
     setDescription(props.listing.description);
-    if (props.listing.fromDate) setFromDate(props.listing.fromDate.substring(0,props.listing.fromDate.indexOf('T')));
-    else setFromDate('');
-    if (props.listing.toDate) setToDate(props.listing.toDate.substring(0,props.listing.toDate.indexOf('T')));
-    else setToDate('');
-    setPrice(props.listing.price);
+
+    if (props.listing.fromDate) setFromDate(props.listing.fromDate.slice(0, props.listing.fromDate.length));
+    else setFromDate([]);
+    if (props.listing.toDate) setToDate(props.listing.toDate.slice(0, props.listing.toDate.length));
+    else setFromDate([]);
+    if (props.listing.roomType) setRoomType(props.listing.roomType.slice(0, props.listing.roomType.length));
+    else setRoomType([]);
+    if (props.listing.rooming) setRooming(props.listing.rooming.slice(0, props.listing.rooming.length));
+    else setRooming([]);
+    if (props.listing.price) setPrice(props.listing.price.slice(0, props.listing.price.length));
+    else setPrice([]);
     setPriceError(false);
     setCount(props.listing.count);
     setBuilding(props.listing.building);
-    setDoorman(props.listing.doorman);
+    if (props.listing.doorman) setDoorman(props.listing.doorman);
+    else setDoorman('');
     setLaundry(props.listing.laundry);
     setBed(props.listing.bed);
     setBath(props.listing.bath);
-    setRoomType(props.listing.roomType);
-    setRooming(props.listing.rooming);
+    
     setDisabled(true);
     setActive(props.listing.active);
-    if (props.listing.mates != null) setMates(props.listing.mates.slice(0,props.listing.mates.length))
+    if (props.listing.mates != null && props.listing.mates != '') setMates(props.listing.mates.slice(0,props.listing.mates.length))
     else setMates([]);
     setCheck(false);
   }, [props.listing]);
@@ -201,19 +221,21 @@ export default function Listing(props) {
     }
   }, [check])
   
-  function checkChanges() {
+  function checkChanges() {   
+    for (var i = 0 ; i < price.length; i ++) {
+      if (fromDate[i] == "" || fromDate == null) return setDisabled(true);
+      else if (toDate[i] == "" || toDate == null ) return setDisabled(true);
+      else if (price[i] == "" || price == null) return setDisabled(true);
+      else if (roomType[i] == "" || roomType == null) return setDisabled(true);
+      else if (rooming[i] == ""|| rooming == null ) return setDisabled(true);
+    }
     if (address == "") setDisabled(true);
-    else if (fromDate == "" || fromDate == null) setDisabled(true);
-    else if (toDate == "" || toDate == null ) setDisabled(true);
-    else if (price == "" || price == null) setDisabled(true);
     else if (count == "" || count == null) setDisabled(true);
     else if (building == ""|| building == null ) setDisabled(true);
     else if (doorman != 0 && doorman != 1) setDisabled(true);
     else if (laundry == "" || laundry == null) setDisabled(true);
     else if (bed == "" || bed == null) setDisabled(true);
     else if (bath == ""|| bath == null ) setDisabled(true);
-    else if (roomType == "" || roomType == null) setDisabled(true);
-    else if (rooming == ""|| rooming == null ) setDisabled(true);
     else if (addressError || priceError) return setDisabled(true);
     else {
       setDisabled(false);
@@ -248,30 +270,6 @@ export default function Listing(props) {
     setDescription(e.target.value);
     setCheck(true);
   }
-  function changeFromDate(e) {
-    setFromDate(e.target.value);
-    setCheck(true);
-  }
-  function changeToDate(e) {
-    setToDate(e.target.value);
-    setCheck(true);
-  }
-  function changePrice(e) {
-    console.log(e.target.value);
-    if (isNaN(e.target.value)) {//non numerical
-       setPriceError(true);
-    }
-    else {//numerical
-      //format
-      const temp = e.target.value.split(".");
-      if (temp.length == 1) setPrice(e.target.value); //no decimal
-      else if (temp[1].length <= 2) setPrice(e.target.value);//no more than 2 dec places
-      if (e.target.value == "" || e.target.value == null) setPriceError(true);
-      else setPriceError(false);
-      checkChanges(e.target.value);
-    }
-    setCheck(true);
-  }
   function changeCount(e) {
     setCount(e.target.value);
     setCheck(true);
@@ -296,17 +294,83 @@ export default function Listing(props) {
     setBath(e.target.value);
     setCheck(true);
   }
-  function changeRoomType(e) {
-    setRoomType(e.target.value);
-    setCheck(true);
-  }
-  function changeRooming(e) {
-    setRooming(e.target.value);
-    setCheck(true);
-  }
+
   function changeActive(e) {
     if (e.target.checked)setActive(1);
     else setActive(0);
+    setCheck(true);
+  }
+  /**EDIT ROOM */
+  function changeRoomType(index, e) {
+    var temp = roomType;
+    temp[index] = e.target.value;
+    setRoomType(temp);
+    setCheck(true);
+  }
+  function changeRooming(index, e) {
+    var temp = rooming;
+    temp[index] = e.target.value;
+    setRooming(temp);
+    setCheck(true);
+  }
+  function changeFromDate(index, e) {
+    var temp = fromDate;
+    temp[index] = e.target.value;
+    setFromDate(temp);
+    setCheck(true);
+  }
+  function changeToDate(index, e) {
+    var temp = toDate;
+    temp[index] = e.target.value;
+    setToDate(temp);
+    setCheck(true);
+  }
+  function changePrice(index, e) {
+    console.log(e.target.value);
+    if (isNaN(e.target.value)) {//non numerical
+       setPriceError(true);
+    }
+    else {//numerical
+      const temp = e.target.value.split(".");
+      const arr = price;
+      if (temp.length == 1) {//no decimal
+        arr[index] = e.target.value;
+        setPrice(arr); 
+      }
+      else if (temp[1].length <= 2) {//no more than 2 dec places
+        arr[index] = e.target.value;
+        setPrice(arr); 
+      }
+      
+      if (e.target.value == "" || e.target.value == null) setPriceError(true);
+      else setPriceError(false);
+    }
+    setCheck(true);
+  }
+  function addRoom() {
+    var temp = price; temp.push('');
+    setPrice(temp);
+    temp = fromDate; temp.push('');
+    setFromDate(temp);
+    temp = toDate; temp.push('');
+    setToDate(temp);
+    temp = rooming; temp.push('');
+    setRooming(temp);
+    temp = roomType; temp.push('');
+    setRoomType(temp);
+    setCheck(true);
+  }
+  function deleteRoom(index) {
+    var temp = price; temp.splice(index,1);
+    setPrice(temp);
+    temp = fromDate; temp.splice(index,1);
+    setFromDate(temp);
+    temp = toDate; temp.splice(index,1);
+    setToDate(temp);
+    temp = rooming; temp.splice(index,1);
+    setRooming(temp);
+    temp = roomType; temp.splice(index,1);
+    setRoomType(temp);
     setCheck(true);
   }
   /**EDIT MATES */
@@ -419,9 +483,101 @@ export default function Listing(props) {
       console.log(err);
     }
   }
-
+  const editRoom = (index) => (
+    <React.Fragment key={index}>
+      <Paper className={classes.room}>
+        <ListItem>
+        {/**room type */}
+        <TextField
+          id="roomType"
+          select
+          label="Type of Rooming"
+          variant="outlined"
+          value={rooming[index] ||''}
+          helperText='Please select'
+          className={classes.smallTextField}
+          onChange={(e) => changeRooming(index, e)}
+          required
+            >{roomTypeOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                    </MenuItem>
+                ))}
+        </TextField>
+        {/**room facility type */}
+        <TextField
+          id="roomType"
+          select
+          label="Type of Room"
+          value={roomType[index] || ''}
+          variant="outlined"
+          helperText='Please select'
+          className={classes.smallTextField}
+          onChange={(e) => changeRoomType(index, e)}
+          required
+            >{roomFacilityOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                    </MenuItem>
+                ))}
+        </TextField>
+        </ListItem>
+        <ListItem>
+        {/**From date */}
+            <TextField
+        id="fromDate"
+        label="Available from"
+        type="date"
+        variant="outlined"
+        value={fromDate[index]|| ''}
+        className={classes.textField}
+        InputLabelProps={{
+          shrink: true,
+        }}
+        className={classes.smallTextField}
+        onChange={(e) => changeFromDate(index, e)}
+        required
+      />
+       {/**To date */}
+       <TextField
+        id="toDate"
+        label="to"
+        type="date"
+        variant="outlined"
+        value={toDate[index]||''}
+        className={classes.textField}
+        InputLabelProps={{
+          shrink: true,
+        }}
+        className={classes.smallTextField}
+        onChange={(e) => changeToDate(index, e)}
+        required
+      />
+        </ListItem>   
+        <ListItem>
+           {/**Price */}
+           <TextField
+          error={priceError}
+          label="Price"
+          variant="outlined"
+          value={price[index] ||''}
+          className={classes.bigTextField}
+          onChange={(e) => changePrice(index, e)}
+          required
+            />
+        </ListItem>
+        <ListItem button
+        onClick={() => deleteRoom(index)}>
+          <ListItemText className={classes.center}>
+            <Typography color='primary'>Delete</Typography>
+          </ListItemText>
+        </ListItem>
+        </Paper>
+    </React.Fragment>
+  )
   return (
     <div className={classes.root}>
+      {/**SAVE CHANGES ******************* */}
       <Snackbar
         anchorOrigin={{ vertical, horizontal }}
         key={`${vertical},${horizontal}`}
@@ -430,11 +586,12 @@ export default function Listing(props) {
         message="Please save changes!"
       />
     <Submap coordinates={[longitude,latitude]} />
-    <List className={classes.form}>
+    <List className={classes.body}>
     <Typography variant="body2"color='textSecondary' >
        id: {props.listing.lid}
     </Typography>
       <List className={classes.right}>
+        {/**ACTIVE ********************************************** */}
       <ListItem>
         <ListItemText className={classes.textPadding}>
         {active==1 && (<Typography color='secondary'> Active</Typography>)}
@@ -491,133 +648,12 @@ export default function Listing(props) {
 
       </ListItem>
       <Divider/>
+      <ListItem className={classes.header}>
+      <Typography variant="h5"color='textPrimary' >
+        Basic Information
+      </Typography>
+      </ListItem>
       <ListItem>
-        {/**Address */}
-        <TextField
-          error={addressError}
-          id="address"
-          label="Street Address"
-          variant="outlined"
-          value={address||''}
-          className={classes.bigTextField}
-          onChange={changeAddress}
-          required
-           />    
-        </ListItem>
-        <ListItem>
-        {/**Description */}
-        <TextField
-          id="description"
-          label="Description"
-          rows={4}
-          multiline
-          variant="outlined"
-          value={description || ''}
-          className={classes.bigTextField}
-          onChange={changeDescription}
-            />
-        </ListItem>
-        <ListItem>
-        {/**From date */}
-            <TextField
-        id="fromDate"
-        label="Available from"
-        type="date"
-        variant="outlined"
-        value={fromDate|| ''}
-        className={classes.textField}
-        InputLabelProps={{
-          shrink: true,
-        }}
-        className={classes.smallTextField}
-        onChange={changeFromDate}
-        required
-      />
-       {/**To date */}
-       <TextField
-        id="toDate"
-        label="to"
-        type="date"
-        variant="outlined"
-        value={toDate||''}
-        className={classes.textField}
-        InputLabelProps={{
-          shrink: true,
-        }}
-        className={classes.smallTextField}
-        onChange={changeToDate}
-        required
-      />
-        </ListItem>
-          
-        <ListItem>
-        {/**Price */}
-            <TextField
-          error={priceError}
-          id="price"
-          label="Price"
-          variant="outlined"
-          value={price ||''}
-          className={classes.bigTextField}
-          onChange={changePrice}
-          required
-            />
-        </ListItem>
-       
-    <ListItem>
-    {/**building */}
-        <TextField
-          id="building"
-          select
-          label="Building"
-          variant="outlined"
-          value={building||''}
-          helperText='Please select'
-          className={classes.smallTextField}
-          onChange={changeBuilding}
-          required
-            >{buildingOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                    </MenuItem>
-                ))}
-        </TextField>
-         {/**doorman */}
-         <TextField
-          id="doorman"
-          select
-          label="Doorman"
-          variant="outlined"
-          value={doorman||0}
-          helperText='Please select'
-          className={classes.smallTextField}
-          onChange={changeDoorman}
-          required
-            >{doormanOptions.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                </MenuItem>
-            ))}</TextField>
-        </ListItem>
-        <ListItem>
-      {/**Laundry */}
-      <TextField
-          id="laundry"
-          select
-          label="Laundry"
-          variant="outlined"
-          value={laundry||''}
-          helperText='Please select'
-          className={classes.smallTextField}
-          onChange={changeLaundry}
-          required
-            >{laundryOptions.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                </MenuItem>
-            ))}</TextField>
-        </ListItem>
-        <ListItem>
         {/**bed */}
         <TextField
           id="bed"
@@ -654,41 +690,108 @@ export default function Listing(props) {
             }
         </TextField>
         </ListItem>
+      <ListItem>
+        {/**Address */}
+        <TextField
+          error={addressError}
+          id="address"
+          label="Street Address"
+          variant="outlined"
+          value={address||''}
+          className={classes.bigTextField}
+          onChange={changeAddress}
+          required
+           />    
+        </ListItem>
         <ListItem>
-        {/**room type */}
+        {/**Description */}
         <TextField
-          id="roomType"
-          select
-          label="Type of Rooming"
+          id="description"
+          label="Description"
+          rows={4}
+          multiline
           variant="outlined"
-          value={rooming ||''}
+          value={description || ''}
+          className={classes.bigTextField}
+          onChange={changeDescription}
+            />
+        </ListItem>
+        <Divider/>
+{/**ROOMS UP FOR SALE ******************************************/}
+      <ListItem className={classes.header}>
+      <Typography variant="h5"color='textPrimary' >
+        Listing for Home Mates
+      </Typography>
+      </ListItem>
+      {price.map( (key, index) => (
+          editRoom(index)
+      ))}
+      <ListItem>
+      <Button color='primary'
+          onClick={addRoom}
+          startIcon={<AddCircleOutlineIcon />}
+          >Add availability</Button>
+      </ListItem>
+      <Divider/>
+
+{/**BUILDING DETAILS ************************************************** */}
+    <ListItem className={classes.header}>
+      <Typography variant="h5"color='textPrimary' >
+        Building Amenities
+      </Typography>
+    </ListItem>
+    <ListItem>
+    {/**building */}
+        <TextField
+          id="building"
+          select
+          label="Building"
+          variant="outlined"
+          value={building||''}
           helperText='Please select'
           className={classes.smallTextField}
-          onChange={changeRooming}
+          onChange={changeBuilding}
           required
-            >{roomTypeOptions.map((option) => (
+            >{buildingOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
                         {option.label}
                     </MenuItem>
                 ))}
         </TextField>
-        {/**room facility type */}
-        <TextField
-          id="roomType"
+         {/**doorman */}
+         <TextField
+          id="doorman"
           select
-          label="Type of Room"
-          value={roomType || ''}
+          label="Doorman"
           variant="outlined"
+          value={doorman}
           helperText='Please select'
           className={classes.smallTextField}
-          onChange={changeRoomType}
+          onChange={changeDoorman}
           required
-            >{roomFacilityOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                    </MenuItem>
-                ))}
-        </TextField>
+            >{doormanOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                </MenuItem>
+            ))}</TextField>
+        </ListItem>
+        <ListItem>
+      {/**Laundry */}
+      <TextField
+          id="laundry"
+          select
+          label="Laundry"
+          variant="outlined"
+          value={laundry||''}
+          helperText='Please select'
+          className={classes.smallTextField}
+          onChange={changeLaundry}
+          required
+            >{laundryOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                </MenuItem>
+            ))}</TextField>
         </ListItem>
         </List>
         <List>

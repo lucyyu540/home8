@@ -127,7 +127,7 @@ export default function NavBar() {
             <ListItemIcon><ListIcon /></ListItemIcon>
             <ListItemText primary={'My homes'} />
           </ListItem>
-          <ListItem button component={Link} to='/my-listings' key={'MyListings'}>
+          <ListItem button component={Link} to='/my-listings/all' key={'MyListings'}>
             <ListItemIcon><ListIcon /></ListItemIcon>
             <ListItemText primary={'My listings'} />
           </ListItem>

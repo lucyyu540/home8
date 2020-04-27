@@ -1,8 +1,8 @@
 /**DEPENDENCIES */
 const express = require('express');
 const router = express.Router();
-const users = require('../db/table/users')
-const listings = require('../db/table/listings')
+const users = require('../db/table/users');
+const listings = require('../db/table/listings');
 
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /**PUBLIC LISTTINGS BASED ON COORDINATES */
@@ -16,24 +16,38 @@ router.put('/listings',  async (req,res) => {
     try{
         const results = await listings.getListingsByCoordinates(a,b,c,d);
         //modify results:
-        // convert id --> usernames
         for (var i = 0 ; i < results.length; i ++) {
             const owner = await users.getUsernameByUserid(results[i].owner);
-            var mate1, mate2, mate3, mate4, mate5, mate6;
-            if (results[i].mate1 != null) mate1 = await users.getUsernameByUserid(results[i].mate1);
-            if (results[i].mate2 != null) mate2 = await users.getUsernameByUserid(results[i].mate2);
-            if (results[i].mate3 != null) mate3 = await users.getUsernameByUserid(results[i].mate3);
-            if (results[i].mate4 != null) mate4 = await users.getUsernameByUserid(results[i].mate4);
-            if (results[i].mate5 != null) mate5 = await users.getUsernameByUserid(results[i].mate5);
-            if (results[i].mate6 != null) mate6 = await users.getUsernameByUserid(results[i].mate6);
-
-            results[i].owner = [results[i].owner, owner];
-            results[i].mate1 = [results[i].mate1, mate1];
-            results[i].mate2 = [results[i].mate2, mate2];
-            results[i].mate3 = [results[i].mate3, mate3];
-            results[i].mate4 = [results[i].mate4, mate4];
-            results[i].mate5 = [results[i].mate5, mate5];
-            results[i].mate6 = [results[i].mate6, mate6];
+            results[i].owner = [results[i].owner, owner];//convert owner id 
+            results[i].address = null; //hide address
+            if (results[i].mates) {
+                const arr = results[i].mates.split(" ");
+                for (var j = 0 ; j < arr.length; j ++) {
+                    const username = await users.getUsernameByUserid(arr[j]);
+                    arr[j] = [arr[j], username];
+                }
+                results[i].mates = arr;
+            }
+            /**price, roomType, rooming, fromDate, toDate */
+            if (results[i].price) {
+                const priceArr = results[i].price.split(" ");
+                const roomTypeArr = results[i].roomType.split(" ");
+                const roomingArr = results[i].rooming.split(" ");
+                const fromDateArr = results[i].fromDate.split(" ");
+                const toDateArr = results[i].toDate.split(" ");
+                results[i].price = priceArr;
+                results[i].roomType = roomTypeArr;
+                results[i].rooming = roomingArr;
+                results[i].fromDate = fromDateArr;
+                results[i].toDateArr = toDateArr;
+            }
+            else {
+                results[i].price = [];
+                results[i].roomType = [];
+                results[i].rooming = [];
+                results[i].fromDate = [];
+                results[i].toDateArr = [];
+            }
         }
         console.log(results);
         res.json(results);
@@ -43,7 +57,6 @@ router.put('/listings',  async (req,res) => {
         res.json(err);
     }
 })
-//INSERT INTO listings (address, longitude, latitude, owner, price, count, active, mate1) VALUES ('280 Marin Blvd', -8242276.281937191, 4970792.388188603, 'auth0|5e8a27cb6595110c10cfe296', 1335, 2, true, 'auth0|5e8a27cb6595110c10cfe296')
 
 /**PUBLIC PROFILE GIVEN USERNAME */
 router.put('/:username', async (req, res) => {
@@ -57,6 +70,47 @@ router.put('/:username', async (req, res) => {
     catch (err) {
         console.log(err);
         console.log('user DNE in mysql');
+    }
+})
+/**GET INDIVIDUAL LISTING GIVEN LID */
+router.get('/listing/:lid', async (req, res) => {
+    const lid = req.params.lid;
+    console.log('endpoint : /listing/' + lid);
+    try {
+        const result = await listings.getListingByLid(lid);
+        const owner = await users.getUsernameByUserid(result.owner);
+        result.owner = [result.owner, owner];
+        /** CONVERT USERID --> USERNAME */
+        if (result.mates) {
+            const arr = result.mates.split(" ");
+            for ( var i = 0 ; i < arr.length ; i ++) {
+                const username = await users.getUsernameByUserid(arr[i]);
+                arr[i] = [arr[i], username];
+            }
+            result.mates = arr;
+        }
+        /**price, roomType, rooming, fromDate, toDate */
+        if (result.price) {
+            result.price = result.price.split(" ");
+            result.roomType  = result.roomType.split(" ");
+            result.rooming  = result.rooming.split(" ");
+            result.fromDate  = result.fromDate.split(" ");
+            result.toDate  = result.toDate.split(" ");
+        }
+        else {
+            result.price = [];
+            result.roomType = [];
+            result.rooming = [];
+            result.fromDate = [];
+            result.toDateArr = [];
+        }
+        /**HIDE ADDRESS */
+        result.address = null;
+        res.json(result);
+    }
+    catch(err) {
+        console.log(err);
+        res.json(err);
     }
 })
 module.exports = router;

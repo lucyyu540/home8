@@ -25,6 +25,17 @@ db.getListingsByUserid = (userid) => {
         });
     });
 }
+db.getListingByLid = (lid) => {
+    return new Promise((res, rej) => {
+        sql.query('SELECT * FROM listings WHERE lid = ?', [lid] ,(err, results) => {
+            if (err) return rej(err);
+            if (results.length > 0) {
+                return res(results[0]);//exists
+            }
+            return rej(err);
+        });
+    });
+}
 db.createListing = (data) => {
     return new Promise ((res, rej) => {
         console.log(data);

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import { useAuth0, user } from "../react-auth0-spa";
+import {useParams } from "react-router-dom";
 
 /**LIST */
 import List from '@material-ui/core/List';
@@ -20,7 +21,8 @@ import '../App.css'
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        flexGrow:1
+        flexGrow:1,
+        minWidth: '35%'
     },
   text: {
     padding: theme.spacing(2, 2, 0),
@@ -28,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     top: 0,
     paddingBottom: 50,
-    height:'85vh'
+    height:'85vh',
   },
   list: {
     marginBottom: theme.spacing(2),
@@ -42,6 +44,8 @@ export default function ListingResults() {
   const classes = useStyles();
   const { getTokenSilently, user } = useAuth0();
   const [listings, setListings] = React.useState([]);
+  const lid = useParams().lid;
+
 
   /**HANDLE SELECTED LISTING */
   const [ind, setInd] = React.useState(null);
@@ -75,13 +79,24 @@ export default function ListingResults() {
         console.log(err);
     }
   }
-
   
   useEffect(() => {
       getMyListings();
-  }, [user])
+      if (lid != 'all') {
+        //find index of listing with lid
+        for (var i = 0 ; i < listings.length; i ++) {
+          if (listings[i].lid == lid) return setInd(i);
+        }
+      }
+  }, [user, listings.length])
 
-  
+  const displayPrice = (array) => (
+    <div>
+      {array.map((key, index) => (
+        <div key={index}>${array[index]}</div>
+      ))}
+    </div>
+  )
   return (
     <div className='rowC'>
     <div className={classes.root}>
@@ -114,7 +129,7 @@ export default function ListingResults() {
             </Grid>
             <Grid item>
               <Typography gutterBottom variant="subtitle1">
-                ${listings[index].price}
+                {displayPrice(listings[index].price)}
               </Typography>
               <Typography variant="body2" color="textSecondary">
                 {listings[index].count} people

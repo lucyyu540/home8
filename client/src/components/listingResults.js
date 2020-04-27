@@ -92,6 +92,22 @@ export default function ListingResults(props) {
   function unhandleHovered(e) {
     props.updateHovered(null);
   }
+
+  const displayPrice = (array) => (
+    <div>
+      {array.map((key, index) => (
+        <div key={index}>${array[index]}</div>
+      ))}
+    </div>
+  )
+  const displayRoomingRoomType = (a, b) => (
+    <div>
+      {a.map((key, index) => (
+        <div key={index}>{a[index]}{' '}{b[index]}</div>
+      ))}
+    </div>
+  )
+
   
 
   return (
@@ -123,8 +139,12 @@ export default function ListingResults(props) {
           <Grid item xs={12} sm container>
             <Grid item xs container direction="column" spacing={2}>
               <Grid item xs>
-                <Typography gutterBottom variant="subtitle1">
-                {listings[index].roomType} {listings[index].rooming} {listings[index].bed}bed{listings[index].bath}bath
+                {/**TITLE OF LISTING */}
+                <Typography variant="subtitle1">
+                  {displayRoomingRoomType(listings[index].roomType, listings[index].rooming)}
+                </Typography>
+                <Typography gutterBottom variant="body2" color="textSecondary">
+                  {listings[index].bed}bed{listings[index].bath}bath
                 </Typography>
                 <Typography 
                   variant="body2" 
@@ -154,27 +174,11 @@ export default function ListingResults(props) {
                 >
                 <Typography>Personality Match Score</Typography>
                 </Popover>
-                {listings[index].doorman &&(
-                <Typography variant="body2" color="textSecondary">
-                Doorman: <CheckIcon fontSize='small'/>
-                </Typography>
-                )}
-                {!listings[index].doorman && (
-                <Typography variant="body2" color="textSecondary">
-                Doorman: <CloseIcon fontSize='small'/>
-                </Typography>
-                )}
-                <Typography variant="body2" color="textSecondary">
-                  Building: {listings[index].building}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Laundry: {listings[index].laundry}
-                </Typography>
               </Grid>
             </Grid>
             <Grid item>
-              <Typography gutterBottom variant="subtitle1">
-                ${listings[index].price}
+              <Typography gutterBottom variant="subtitle1" color="secondary">
+                {displayPrice(listings[index].price)}
               </Typography>
               <Typography variant="body2" color="textSecondary">
                 {listings[index].count} people
@@ -187,7 +191,7 @@ export default function ListingResults(props) {
         </List>
       </Paper>
 
-      {/**POP UP */}
+      {/**POP UP ****************************************************/}
       {ind!=null && (<div>
       <Dialog
         open={on}
@@ -200,9 +204,8 @@ export default function ListingResults(props) {
       >
         <Submap coordinates={[listings[ind].longitude, listings[ind].latitude]} />
         <DialogTitle id="scroll-dialog-title">
-          {listings[ind].roomType} {listings[ind].bed}bed{listings[ind].bath}bath
+          {listings[ind].bed}bed{listings[ind].bath}bath
         </DialogTitle>
-        <DialogContent>{listings[ind].address}</DialogContent>
         <DialogContent> Roomates: </DialogContent>
         <DialogContent>${listings[ind].price}</DialogContent>
         <DialogContent dividers>

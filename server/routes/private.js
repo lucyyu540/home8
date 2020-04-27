@@ -27,7 +27,8 @@ router.put('/listings',  async (req,res) => {
         const results = await listings.getListingsByCoordinates(a,b,c,d);
         for (var i = 0 ; i < results.length; i ++) {
             const owner = await users.getUsernameByUserid(results[i].owner);
-            results[i].owner = [results[i].owner, owner];
+            results[i].owner = [results[i].owner, owner];//owner username
+            /**mates username */
             if (results[i].mates) {
                 const arr = results[i].mates.split(" ");
                 for (var j = 0 ; j < arr.length; j ++) {
@@ -36,6 +37,23 @@ router.put('/listings',  async (req,res) => {
                 }
                 results[i].mates = arr;
             }
+            /**price, roomType, rooming, fromDate, toDate */
+            if (results[i].price) {
+                results[i].price = results[i].price.split(" ");
+                results[i].roomType  = results[i].roomType.split(" ");
+                results[i].rooming  = results[i].rooming.split(" ");
+                results[i].fromDate  = results[i].fromDate.split(" ");
+                results[i].toDate  = results[i].toDate.split(" ");
+            }
+            else {
+                results[i].price = [];
+                results[i].roomType = [];
+                results[i].rooming = [];
+                results[i].fromDate = [];
+                results[i].toDateArr = [];
+            }
+
+            /**sort into favorites */
             const lid = 'lid'+results[i].lid;
             if (favorites[lid]) sorted.favorites.push(results[i]);
             else sorted.public.push(results[i]);
@@ -47,6 +65,58 @@ router.put('/listings',  async (req,res) => {
         console.log('the error',err);
     }   
 })
+
+/**GET INDIVIDUAL LISTING DETAILS */
+router.get('/listing/:lid', async (req, res) => {
+    const lid = req.params.lid;
+    console.log('endpoint: private/listing/'+lid);
+    const userid = req.user.sub;
+    try {
+        const result = await listings.getListingByLid(lid);
+        /**CHECK IF USER IS OWNER */
+        var allowed = false;
+        if (result.owner == userid) allowed = true;
+        const owner = await users.getUsernameByUserid(result.owner);
+        result.owner = [result.owner, owner];
+        /**CONVERTING USERID --> USERNAME */
+        if (result.mates) {
+            const arr = result.mates.split(" ");
+            for ( var i = 0 ; i < arr.length ; i ++) {
+                if (arr[i] == userid) allowed = true; //CHECK IF USER IS MATE
+                const username = await users.getUsernameByUserid(arr[i]);
+                arr[i] = [arr[i], username];
+            }
+            result.mates = arr;
+        }
+        else result.mates = [];
+        /**price, roomType, rooming, fromDate, toDate */
+        if (result.price) {//&&!allowed
+            result.price = result.price.split(" ");
+            result.roomType  = result.roomType.split(" ");
+            result.rooming  = result.rooming.split(" ");
+            result.fromDate  = result.fromDate.split(" ");
+            result.toDate  = result.toDate.split(" ");
+        }
+        else {
+            result.price = [];
+            result.roomType = [];
+            result.rooming = [];
+            result.fromDate = [];
+            result.toDateArr = [];
+        }
+        console.log(result);
+        if (allowed) res.json(result);
+        else {
+            result.address = null;//hide address
+            res.json(result);
+        }
+    }
+    catch (err) {
+        console.log(err);
+        res.json(err);
+    }
+});
+
 router.get('/my-listings', async (req, res) => {
     const userid = req.user.sub;
     console.log('endpoint: private/my-listings', userid);
@@ -61,7 +131,23 @@ router.get('/my-listings', async (req, res) => {
                 }
                 results[i].mates = arr;
             }
+            /**price, roomType, rooming, fromDate, toDate */
+            if (results[i].price) {
+                results[i].price = results[i].price.split(" ");
+                results[i].roomType  = results[i].roomType.split(" ");
+                results[i].rooming  = results[i].rooming.split(" ");
+                results[i].fromDate  = results[i].fromDate.split(" ");
+                results[i].toDate  = results[i].toDate.split(" ");
+            }
+            else {
+                results[i].price = [];
+                results[i].roomType = [];
+                results[i].rooming = [];
+                results[i].fromDate = [];
+                results[i].toDateArr = [];
+            }
         }
+            
         console.log(results);
         res.json(results);
     }
@@ -78,23 +164,28 @@ router.put('/create-listing', async (req, res) => {
         if (i == 0) mates = req.body.mates[0][0];
         else mates += " " + req.body.mates[i][0];
     }
+    const price = arrayToString(req.body.price);
+    const rooming = arrayToString(req.body.rooming);
+    const roomType = arrayToString(req.body.roomType);
+    const fromDate = arrayToString(req.body.fromDate);
+    const toDate = arrayToString(req.body.toDate);
     const data = {
         owner: userid,
         address: req.body.address,
         longitude: parseFloat(req.body.longitude),
         latitude: parseFloat(req.body.latitude),
         description: req.body.description,
-        price: parseFloat(req.body.price),
+        price: price,
         count: parseInt(req.body.count),
         doorman: parseInt(req.body.doorman),
         building: req.body.building,
         laundry: req.body.laundry,
         bed: parseInt(req.body.bed),
         bath: parseInt(req.body.bath),
-        roomType: req.body.roomType,
-        rooming: req.body.rooming,
-        fromDate: req.body.fromDate,
-        toDate: req.body.toDate,
+        roomType: roomType,
+        rooming: rooming,
+        fromDate: fromDate,
+        toDate: toDate,
         active: parseInt(req.body.active),
         mates: mates
     }
@@ -117,23 +208,28 @@ router.put('/update-listing', async (req, res) => {
         if (i == 0) mates = req.body.mates[0][0];
         else mates += " " + req.body.mates[i][0];
     }
+    const price = arrayToString(req.body.price);
+    const rooming = arrayToString(req.body.rooming);
+    const roomType = arrayToString(req.body.roomType);
+    const fromDate = arrayToString(req.body.fromDate);
+    const toDate = arrayToString(req.body.toDate);
     const data = {
         lid: parseInt(req.body.lid),
         address: req.body.address,
         longitude: parseFloat(req.body.longitude),
         latitude: parseFloat(req.body.latitude),
         description: req.body.description,
-        price: parseFloat(req.body.price),
+        price: price,
         count: parseInt(req.body.count),
         doorman: !!parseInt(req.body.doorman),
         building: req.body.building,
         laundry: req.body.laundry,
         bed: parseInt(req.body.bed),
         bath: parseInt(req.body.bath),
-        roomType: req.body.roomType,
-        rooming: req.body.rooming,
-        fromDate: req.body.fromDate,
-        toDate: req.body.toDate,
+        roomType: roomType,
+        rooming: rooming,
+        fromDate: fromDate,
+        toDate: toDate,
         active: !!parseInt(req.body.active),
         mates: mates
     }
@@ -243,7 +339,14 @@ router.put('/submit-answer', async (req, res) => {
     }
 })
 
-
+function arrayToString(arr) {
+    var s = '';
+    for (var i = 0 ; i < arr.length; i ++) {
+        if (i == 0) s = arr[0];
+        else s += " " + arr[i];
+    }
+    return s;
+}
 function euclideanDistance(A, B) {
     var sum = 0;
     var maxDistance = 0;
