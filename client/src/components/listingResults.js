@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useAuth0, user } from "../react-auth0-spa";
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Paper from '@material-ui/core/Paper';
@@ -51,15 +52,71 @@ const useStyles = makeStyles((theme) => ({
   },
   popup: {
     padding: theme.spacing(1)
-  }
+  },
+  textPadding: {
+    padding: theme.spacing(0,1)
+  },
 }));
 
 export default function ListingResults(props) {
   const classes = useStyles();
-  var listings = props.listings;
-  var favoriteListings = props.favoriteListings;
-  if (!listings) listings = [];
-  if (!favoriteListings) favoriteListings = [];
+  const { getTokenSilently, user,isAuthenticated, loginWithRedirect } = useAuth0();
+  const [listings, setListings] = React.useState([]);
+  const [favoriteListings, setFavoriteListings] = React.useState([]);
+  const [req, setReq] = React.useState(null);
+  const [room, setRoom] = React.useState({});
+  console.log(req);
+  useEffect(()=> {
+    if (props.listings) setListings(props.listings);
+    if (props.favoriteListings) setFavoriteListings(props.favoriteListings);
+    /**GET ALL REQUESTS SENT BY USER */
+    if (user) getSentRequests();
+  },[props])
+  /**API */
+  async function getSentRequests() {
+    try {
+      const token = await getTokenSilently();
+      const res = await fetch(`https://localhost:3000/private/send/outbox/requests`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }, 
+      method: 'get', 
+      });
+      const data = await res.json();
+      setReq(data);
+    }
+    catch(err) {
+      console.log(err);
+    }
+  }
+  async function requestAPI(index, owner, lid, fromDate, toDate, price, rooming, roomType) {
+    console.log('request clicked');
+    if (!user) return loginWithRedirect({});
+    try{
+      const token = await getTokenSilently();
+      const data = {
+          to: owner,
+          lid: lid,
+          fromDate: fromDate,
+          toDate: toDate,
+          price: price,
+          rooming: rooming,
+          roomType: roomType
+      }
+      const response = await fetch(`https://localhost:3000/private/send/request`, {
+          headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }, 
+          method: 'put', 
+          body: JSON.stringify(data)
+      });
+      setRoom({...room, [`${index}`] : 1 });
+    }
+    catch(err) {
+      console.log(err);
+    }
+}
   /**POP UP PERSONALITY ANALYSIS */
   const [anchorEl, setAnchorEl] = React.useState(null);
   const handlePopoverOpen = (event) => {
@@ -73,12 +130,24 @@ export default function ListingResults(props) {
   const [on, setOn] = React.useState(false);
   const [ind, setInd] = React.useState(null);
   function handleClickOpen(i){
-    console.log('clicked a listing', listings[i].lid);
     props.updateSelected(listings[i].lid);
     setInd(i);
+    for (var j = 0 ; j < req.length; j ++) {
+      if (req[j].lid == listings[i].lid) {
+        var temp = room;
+        for (var index = 0 ; index < listings[i].price.length; index ++) {
+          if (req[j].content == listings[i].fromDate[index]+ ' '+listings[i].toDate[index]+ ' '+listings[i].price[index]+ ' '+listings[i].rooming[index]+ ' '+listings[i].roomType[index]){
+            temp[index] = 1;
+            break;
+          }
+        }
+        setRoom(temp);
+      }
+    }
     setOn(true);
   }
   function handleClose() {
+    setRoom({});
     setOn(false);
     setInd(null);
   }
@@ -86,13 +155,12 @@ export default function ListingResults(props) {
   
   /**HANDLE MOUSE HOVERING */
   function handleHovered(e) {
-    console.log('hovering over a listing', e);
     props.updateHovered(e);
   }
   function unhandleHovered(e) {
     props.updateHovered(null);
   }
-
+  /** DISPLAY */
   const displayPrice = (array) => (
     <div>
       {array.map((key, index) => (
@@ -107,6 +175,39 @@ export default function ListingResults(props) {
       ))}
     </div>
   )
+  const displayRooms = (i) => (
+    listings[i].price.map((key, index) => (
+      <ListItem key={index}>
+      <Grid container alignItems="center">
+          <Grid item xs = {2}>
+              <Typography variant="body2"color='secondary'>${listings[i].price[index]} </Typography>
+          </Grid>
+          <Grid item xs = {3}>
+              <Typography variant="body2"color='textPrimary'>{listings[i].roomType[index]} {listings[i].rooming[index]}</Typography>
+          </Grid>
+          <Grid item xs>
+                <Grid container>
+                    <Grid item><Typography variant="body2"color='secondary'>{listings[i].fromDate[index]}</Typography></Grid>
+                    <Grid item><Typography className={classes.textPadding} variant="caption"color='textSecondary'>to</Typography></Grid>
+                    <Grid item><Typography variant="body2"color='secondary'>{listings[i].toDate[index]}</Typography></Grid>
+                </Grid>
+          </Grid>
+          <Grid item xs = {2} >
+                {room && room[index] &&(
+                    <Button color='primary' disabled>Requested</Button>
+                )}
+                {!room || !room[index] &&(
+                    <Button color='primary'
+                onClick={() => requestAPI(index, listings[i].owner[0], listings[i].lid, listings[i].fromDate[index], listings[i].toDate[index],listings[i].price[index],listings[i].rooming[index],listings[i].roomType[index])}
+                >Request
+                </Button>
+                )}
+          </Grid>
+          
+        </Grid>
+      </ListItem>
+    ))
+)
 
   
 
@@ -206,30 +307,27 @@ export default function ListingResults(props) {
         <DialogTitle id="scroll-dialog-title">
           {listings[ind].bed}bed{listings[ind].bath}bath
         </DialogTitle>
-        <DialogContent> Roomates: </DialogContent>
-        <DialogContent>${listings[ind].price}</DialogContent>
+        <DialogContent>
+          {displayRooms(ind)}
+        </DialogContent>
         <DialogContent dividers>
           <DialogContentText
-            id="scroll-dialog-description"
             tabIndex={-1}
           >
             {listings[ind].description}            
           </DialogContentText>
           <DialogContentText
-            id="scroll-dialog-description"
             tabIndex={-1}
           >
             Building: {listings[ind].building}
           </DialogContentText>
           <DialogContentText
-            id="scroll-dialog-description"
             tabIndex={-1}
           >
             Laundry: {listings[ind].laundry}
           </DialogContentText>
           {listings[ind].doorman && (
             <DialogContentText
-            id="scroll-dialog-description"
             tabIndex={-1}
           >
             Doorman
@@ -237,9 +335,6 @@ export default function ListingResults(props) {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Request
-          </Button>
           <Button onClick={handleClose} color="primary">
             Favorite
           </Button>

@@ -300,7 +300,7 @@ export default function Listing(props) {
     else setActive(0);
     setCheck(true);
   }
-  /**EDIT ROOM */
+  /**EDIT ROOM **************************************/
   function changeRoomType(index, e) {
     var temp = roomType;
     temp[index] = e.target.value;

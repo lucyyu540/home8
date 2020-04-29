@@ -80,13 +80,6 @@ export default function Landing() {
     }
   }, [user, range] )
 
-
-  console.log(range);
-  console.log(listings);
-  console.log(selected);
-  console.log(hovered);
-
-
     return( 
         <div className='rowC'>
             <SearchMap 

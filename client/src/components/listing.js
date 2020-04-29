@@ -14,6 +14,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import GridList from '@material-ui/core/GridList';
 
 /**ICONS */
 import EditIcon from '@material-ui/icons/Edit';
@@ -69,25 +70,28 @@ const useStyles = makeStyles((theme) => ({
   },
   divider: {
     margin: theme.spacing(5,0,0)
-  }
+  },
+  textPadding: {
+    padding: theme.spacing(0,1)
+  },
 }));
 
 export default function Listing(props) {
   const classes = useStyles();
-  const { getTokenSilently, user,isAuthenticated } = useAuth0();
+  const { getTokenSilently, user,isAuthenticated, loginWithRedirect } = useAuth0();
   const lid = useParams().lid;
   const [listing, setListing] = React.useState({
     longitude : 0, 
     latitude : 0,
-    mates: [],
-    price : []
-})
-
+    })
+const [sentReq, setSentReq] = React.useState({});
+console.log(sentReq);
   /**API CALLS */
   useEffect(() => {
     if (user) privateAPI();
     else publicAPI();
-  }, [user]) 
+  }, []);
+
   console.log(listing);
   async function privateAPI() {
     try{
@@ -100,6 +104,25 @@ export default function Listing(props) {
       });
       const responseData = await response.json();
       setListing(responseData);
+      const outboxResponse = await fetch(`https://localhost:3000/private/send/outbox/requests`, {
+          headers: {
+              Authorization: `Bearer ${token}`,
+            }, 
+          method: 'get', 
+      });
+      const outboxData = await outboxResponse.json();
+      var obj = {}
+      for (var i = 0 ; i < outboxData.length; i ++) {
+          if (outboxData[i].lid == lid) {
+              for (var index = 0 ; index < responseData.price.length; index ++) {
+                if (outboxData[i].content == responseData.fromDate[index]+ ' '+responseData.toDate[index]+ ' '+responseData.price[index]+ ' '+responseData.rooming[index]+ ' '+responseData.roomType[index]){
+                    obj[index] = 1;
+                    break;
+                }
+              }
+          }
+      }
+      setSentReq(obj);
     }
     catch(err) {
       console.log(err);
@@ -117,18 +140,61 @@ export default function Listing(props) {
         console.log(err);
       }
   }
+  async function requestAPI(index, owner, fromDate, toDate, price, rooming, roomType) {
+      console.log('request clicked');
+      if (!user) return loginWithRedirect({});
+    try{
+        const token = await getTokenSilently();
+        const data = {
+            to: owner,
+            lid: lid,
+            fromDate: fromDate,
+            toDate: toDate,
+            price: price,
+            rooming: rooming,
+            roomType: roomType
+        }
+        const response = await fetch(`https://localhost:3000/private/send/request`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }, 
+            method: 'put', 
+            body: JSON.stringify(data)
+        });
+        setSentReq({...sentReq, [`${index}`] : 1 });
+      }
+      catch(err) {
+        console.log(err);
+      }
+  }
   const displayRooms = () => (
       listing.price.map((key, index) => (
         <ListItem key={index}>
-        <Grid container>
+        <Grid container alignItems="center">
             <Grid item xs = {2}>
-                <Typography variant="body1"color='secondary'>{listing.price[index]} </Typography>
+                <Typography variant="body1"color='secondary'>${listing.price[index]} </Typography>
             </Grid>
-            <Grid item xs = {8}>
+            <Grid item xs>
                 <Typography variant="body1"color='textPrimary'>{listing.roomType[index]} {listing.rooming[index]}</Typography>
             </Grid>
+            <Grid item xs = {4}>
+                <Grid container>
+                    <Grid item><Typography variant="body1"color='secondary'>{listing.fromDate[index]}</Typography></Grid>
+                    <Grid item><Typography className={classes.textPadding} variant="body2"color='textSecondary'>to</Typography></Grid>
+                    <Grid item><Typography variant="body1"color='secondary'>{listing.toDate[index]}</Typography></Grid>
+                </Grid>
+            </Grid>
             <Grid item xs = {2}>
-                <Button color='primary'>Request</Button>
+                {sentReq && sentReq[index] &&(
+                    <Button color='primary' disabled>Requested</Button>
+                )}
+                {!sentReq || !sentReq[index] &&(
+                    <Button color='primary'
+                onClick={() => requestAPI(index, listing.owner[0], listing.fromDate[index], listing.toDate[index],listing.price[index],listing.rooming[index],listing.roomType[index])}
+                >Request
+                </Button>
+                )}
             </Grid>
           </Grid>
         </ListItem>
@@ -158,7 +224,7 @@ export default function Listing(props) {
 
         <List className={classes.right}>
         {/**IF OWNER, LINK TO EDITING LISTING */}
-        {listing.owner && listing.owner[0] == user.sub && (<Button
+        {listing.owner && user && listing.owner[0] == user.sub && (<Button
             color="primary"
             startIcon={<EditIcon/>}
             className={classes.button}
@@ -178,12 +244,12 @@ export default function Listing(props) {
       
    
       {/**MATES */}
-      <ListItem>
+      {listing.mates && (<ListItem>
         {listing.mates.map( (key,index) => ( 
           <Button color='primary' component={Link} to={`/${listing.mates[index][1]}`} key={'Profile'}>{listing.mates[index][1]}</Button>
         ))
         }
-      </ListItem>
+      </ListItem>)}
       {/**BODY******************************************** */}
       {/** if resident: 
        * title: address
@@ -212,7 +278,11 @@ export default function Listing(props) {
             Space Available
         </Typography>
       </ListItem>)}
-        {displayRooms()}
+      {listing.price && (
+          <div>
+              {displayRooms()}
+          </div>
+      )}
         <Divider className={classes.divider} />
          {/**building amenities */}
         <ListItem>

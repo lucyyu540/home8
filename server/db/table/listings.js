@@ -85,11 +85,12 @@ db.updateListing = (data) => {
         const fromDate = data.fromDate;
         const toDate = data.toDate;
         const mates = data.mates;
+        const owner = data.owner;
         var set = ' SET description = ?, address = ?, longitude = ?, latitude = ?, price = ?, count = ?, active = ?, '
         var set2 = 'doorman = ?, building = ?, laundry = ?, bed = ?, bath=?, roomType=?, rooming = ?, fromDate=?, toDate=?, mates = ?'
-        var where = 'WHERE lid = ?'
+        var where = 'WHERE lid = ? AND owner = ?'
         sql.query('UPDATE listings'+ set + set2 + where , 
-        [description, address, longitude, latitude, price, count, active, doorman, building, laundry, bed, bath, roomType, rooming, fromDate, toDate, mates, lid], 
+        [description, address, longitude, latitude, price, count, active, doorman, building, laundry, bed, bath, roomType, rooming, fromDate, toDate, mates, lid, owner], 
         (err, results) => {
             if (err) return rej(err);
             return res(results);

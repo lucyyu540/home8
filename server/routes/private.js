@@ -6,6 +6,8 @@ const listings = require('../db/table/listings')
 const favoriteListings = require('../db/table/favoriteListings');
 const personalityAs = require('../db/table/personalityAs');
 const personalityQs = require('../db/table/personalityQs');
+const sendRouter = require('./send');
+router.use('/send', sendRouter);
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 router.put('/listings',  async (req,res) => {
     const userid = req.user.sub;
@@ -214,6 +216,7 @@ router.put('/update-listing', async (req, res) => {
     const fromDate = arrayToString(req.body.fromDate);
     const toDate = arrayToString(req.body.toDate);
     const data = {
+        owner: userid,
         lid: parseInt(req.body.lid),
         address: req.body.address,
         longitude: parseFloat(req.body.longitude),
