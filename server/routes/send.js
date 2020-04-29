@@ -53,7 +53,8 @@ router.put('/message', async (req, res) => {
         console.log(err);      
     }
 })
-/**ALL REQUESTS BY USER */
+/************************************************************************* */
+/**ALL REQUESTS SENT BY USER */
 router.get('/outbox/requests', async (req, res) => {
     const userid = req.user.sub;
     console.log('endpoint: private/send/outbox/requests', userid);
@@ -67,7 +68,20 @@ router.get('/outbox/requests', async (req, res) => {
     }
 
 })
-
+/******************************************************************************* */
+router.get('/inbox/unread', async (req, res) => {
+    const userid = req.user.sub;
+    console.log('endpoint: private/inbox/unread', userid);
+    try{
+        const results = await messages.getUnread(userid);
+        console.log(results);
+        res.json(results);
+    }
+    catch(err) {
+        console.log(err);
+        res.json(err);
+    }
+})
 /**LIST ALL REQUESTS AND CONVERSATIONS */
 router.get('/inbox', async (req, res) => {
     const userid = req.user.sub;

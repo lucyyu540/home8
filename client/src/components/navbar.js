@@ -21,6 +21,8 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import HomeIcon from '@material-ui/icons/Home';
 import { Link } from "react-router-dom";
 import Divider from '@material-ui/core/Divider';
+import Badge from '@material-ui/core/Badge';
+
 
 
 /**AUTH0 */
@@ -57,12 +59,12 @@ const useStyles = makeStyles ( (theme) => ({
 export default function NavBar() {
   
   const classes = useStyles();
-  const { isAuthenticated, loginWithRedirect, logout, user } = useAuth0();
+  const { getTokenSilently, isAuthenticated, loginWithRedirect, logout, user } = useAuth0();
   const [auth, setAuth] = React.useState(true); //see if user is logged in 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
-
-
+  const [noti, setNoti] = React.useState(0);
+  /**HANDLE CHANGE */
   const handleChange = (event) => {
     setAuth(event.target.checked);
   };
@@ -85,6 +87,28 @@ export default function NavBar() {
 
     setState({ ...state, [anchor]: open });
   };
+  async function getNotifications () {
+    try{
+      const token = await getTokenSilently();
+      const response = await fetch(`https://localhost:3000/private/send/inbox/unread`, {
+          headers: {
+              Authorization: `Bearer ${token}`,
+            }, 
+          method: 'get', 
+      });
+      const data = await response.json();//unread messages
+      const count = await data.length;//notifications count
+      setNoti(count);
+      console.log(count);
+    }
+    catch(err) {
+      console.log(err);
+    }
+  }
+  useEffect(()=> {
+    if (user) getNotifications();
+  }, [])
+
   const list = (anchor) => (
     <div
       className={clsx(classes.list, {
@@ -114,7 +138,9 @@ export default function NavBar() {
             <ListItemText primary={'Profile'} />
           </ListItem>
           <ListItem button component={Link} to='/inbox' key={'Inbox'}>
-            <ListItemIcon><MailIcon /></ListItemIcon>
+            <ListItemIcon>
+            <Badge badgeContent={noti} color='error'><MailIcon /></Badge>
+            </ListItemIcon>
             <ListItemText primary={'Inbox'} />
           </ListItem>
       </List>

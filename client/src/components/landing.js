@@ -10,7 +10,7 @@ export default function Landing() {
     const[listings, setListings] = React.useState(null);
     const[favoriteListings, setFavoriteListings] = React.useState(null);
     const [range, setRange] = React.useState([0,0,0,0]);
-    const [readyAPI, setReadyAPI] = React.useState(false);
+    const [readyAPI, setReadyAPI] = React.useState(false); //call api after map view range has been set
     function updateRange(value) {
         setRange(value);
         setReadyAPI(true);
@@ -21,6 +21,7 @@ export default function Landing() {
     function updateHovered(value) {setHovered(value);}
   const { getTokenSilently, user } = useAuth0();
   /**API CALLS */
+  /**private */
   const getCustomListings = async (range) => {
     try {
       console.log('trying /private/listings');
@@ -48,6 +49,7 @@ export default function Landing() {
       console.log(error)
     }
   };
+  /**public */
   const getListings = async (range) => {
     try {
         const data = {
@@ -71,7 +73,7 @@ export default function Landing() {
       console.log(err);
     }
   }
-  /**updating listings based on map view*/
+
   useEffect( ()=> {
     if (readyAPI) {
         if (user) getCustomListings(range);

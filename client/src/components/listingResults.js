@@ -135,6 +135,7 @@ export default function ListingResults(props) {
     for (var j = 0 ; j < req.length; j ++) {
       if (req[j].lid == listings[i].lid) {
         var temp = room;
+        /** check if user has requested for any of the spaces in this listing */
         for (var index = 0 ; index < listings[i].price.length; index ++) {
           if (req[j].content == listings[i].fromDate[index]+ ' '+listings[i].toDate[index]+ ' '+listings[i].price[index]+ ' '+listings[i].rooming[index]+ ' '+listings[i].roomType[index]){
             temp[index] = 1;
