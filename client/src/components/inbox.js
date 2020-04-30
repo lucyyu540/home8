@@ -66,6 +66,11 @@ export default function ListingResults() {
   /**height */
   const [chatroomHeight, setChatroomHeight] = React.useState('92vh');
   const messageHeight = React.useRef(null);
+  /**scroll */
+  const messagesEndRef = useRef(null);
+  const scrollToBottom = () => {
+    messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+  }
 
   const [sel, setSel] = React.useState(null);
   /**HANDLE FUNCTIONS **************************************************** */
@@ -148,6 +153,9 @@ export default function ListingResults() {
   useEffect(() => {
     getInbox();
     if (sel!= null) {
+      /**scroll to bottom */
+      scrollToBottom();
+      /**height */
       var temp = window.innerHeight - messageHeight.current.clientHeight-80;//appbar=66
       temp = vh(temp);
       setChatroomHeight(temp+'vh');
@@ -269,6 +277,7 @@ export default function ListingResults() {
           {/**CHATT HISTORY */}
           <Container style={{height: `${chatroomHeight}`}} className={classes.chatroom}>
           {displaySelConvo(sel)}
+          <div ref = {messagesEndRef} />
           </Container>
           {/**SEND MESSAGE */}
           <Container>
