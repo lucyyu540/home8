@@ -60,19 +60,13 @@ export default function NavBar() {
   
   const classes = useStyles();
   const { getTokenSilently, isAuthenticated, loginWithRedirect, logout, user } = useAuth0();
-  const [auth, setAuth] = React.useState(true); //see if user is logged in 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const [noti, setNoti] = React.useState(0);
   /**HANDLE CHANGE */
-  const handleChange = (event) => {
-    setAuth(event.target.checked);
-  };
-
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
-
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -105,10 +99,17 @@ export default function NavBar() {
       console.log(err);
     }
   }
+  /**SYNC EVERY MIN****************************************************************** */
   useEffect(()=> {
-    if (user) getNotifications();
+    if (user) {
+      const interval = setInterval(() => {
+        console.log('interval')
+        getNotifications();
+      }, 60000);//every min
+      return () => clearInterval(interval);
+    }
   }, [])
-
+ /**SYNC EVERY MIN****************************************************************** */
   const list = (anchor) => (
     <div
       className={clsx(classes.list, {

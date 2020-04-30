@@ -34,6 +34,7 @@ function App() {
           <PrivateRoute path="/inbox" component={Inbox} />
           <PrivateRoute exact path="/:username/edit" component={EditProfile} />
           <PrivateRoute path="/my-listings/:lid" component={MyListings} />
+          <PrivateRoute path="/inbox" component={Inbox} />
           <Route exact path="/:username" component={Profile} />
         </Switch>
       </Router>

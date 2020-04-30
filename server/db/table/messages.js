@@ -1,6 +1,14 @@
 const sql = require('../index');
 var db = {};
 
+db.readMessage = (midArr) => {
+    return new Promise ((res, rej) => {
+        sql.query('UPDATE messages SET `read` = ? WHERE mid IN (?)', [1, midArr] , (err, results) => {
+            if (err) return rej(err);
+            return res(results);
+        })
+    })
+}
 db.getUnread = (userid) => {
     return new Promise((res, rej) => {
         sql.query('SELECT * FROM messages WHERE `to` = ? AND `read` = ?', [userid, 0],(err, results) => {
@@ -9,9 +17,10 @@ db.getUnread = (userid) => {
         });
     });
 }
-db.getMessages = (userid) => {
+/**sent or received */
+db.getAll = (userid) => {
     return new Promise((res, rej) => {
-        sql.query('SELECT * FROM messages WHERE (`from` = ? OR`to` = ? )AND type = ?', [userid, userid, 'message'],(err, results) => {
+        sql.query('SELECT * FROM messages WHERE `from` = ? OR `to` = ?', [userid, userid],(err, results) => {
             if (err) return rej(err);
             return res(results);
         });
