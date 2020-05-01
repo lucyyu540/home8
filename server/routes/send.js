@@ -82,6 +82,19 @@ router.get('/outbox/requests', async (req, res) => {
 
 })
 /******************************************************************************* */
+router.put('/inbox/delete', async (req, res) => {
+    console.log('endpoint: private/inbox/delete');
+    const mid = req.body.mid;
+    try {
+        const result = await messages.deleteMessage(mid);
+        console.log(result);
+        res.json(result);
+    }
+    catch (err) {
+        console.log(err);
+        res.json(err);
+    }
+})
 router.get('/inbox/unread', async (req, res) => {
     const userid = req.user.sub;
     console.log('endpoint: private/inbox/unread', userid);

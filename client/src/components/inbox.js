@@ -2,8 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import { useAuth0, user } from "../react-auth0-spa";
-import {useParams } from "react-router-dom";
 import Container from '@material-ui/core/Container';
+import { Link } from "react-router-dom";
 
 import TextField from '@material-ui/core/TextField';
 
@@ -13,6 +13,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
 
 /**ICONS */
 import Avatar from '@material-ui/core/Avatar';
@@ -21,6 +22,9 @@ import Divider from '@material-ui/core/Divider';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import SendIcon from '@material-ui/icons/Send';
 import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
+import Fab from '@material-ui/core/Fab';
+import CloseIcon from '@material-ui/icons/Close';
 
 
 /**MY MODULES */
@@ -44,17 +48,24 @@ const useStyles = makeStyles((theme) => ({
   listItem : {
     margin: theme.spacing(1),
   },
-  bubble: {
-    padding: theme.spacing(2),
-    margin: theme.spacing(1,3),
+  bubble: {//paper bubble 
+    padding: theme.spacing(1),
+    margin: theme.spacing(1,0),
     maxWidth: 200,
   },
-  chatroom: {
+  chatroom: {//container
     overflow:'auto',
-    padding: theme.spacing(3,0)
+    padding: theme.spacing(2)
   },
   textField: {
     width: '100%'
+  },
+  fab: {
+    margin: theme.spacing(1)
+  },
+  snackBar: {
+    position: 'absolute',
+    zIndex:1,
   }
 }));
 
@@ -63,11 +74,13 @@ export default function ListingResults() {
   const { getTokenSilently, user } = useAuth0();
   const [convo, setConvo] = React.useState({});
   const [newMessage, setNewMessage] = React.useState("");
+  const [receivedRequests, setReceivedRequests] = React.useState([]);
   /**height */
   const [chatroomHeight, setChatroomHeight] = React.useState('92vh');
   const messageHeight = React.useRef(null);
   /**scroll */
   const messagesEndRef = useRef(null);
+  const [scroll, setScroll] = React.useState(0);
   const scrollToBottom = () => {
     messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
   }
@@ -76,9 +89,23 @@ export default function ListingResults() {
   /**HANDLE FUNCTIONS **************************************************** */
   async function handleClickOpen(e){
     setSel(e);
+    setScroll(1);//scroll to bottom of the chat
+    /**make snackbar */
+    var temp = []
+    for (var i = 0 ; i < convo[e].length; i++) {
+      if (convo[e][i].type == 'request' && convo[e][i].to[1] == 'You') temp.push(convo[e][i])
+    }
+    setReceivedRequests(temp);
   }
   function handleNewMessage(e) {
     setNewMessage(e.target.value);
+  }
+  function closeSnackBar(index) {
+    console.log('close snack bar clicked')
+    var temp = receivedRequests; 
+    temp.splice(index,1);
+    console.log(temp);
+    setReceivedRequests(temp);
   }
   /**API CALLS********************************************************** */
   async function handleSend() {
@@ -101,6 +128,7 @@ export default function ListingResults() {
           body: JSON.stringify(data)
       });
       setNewMessage("");//clear textfield
+      setScroll(1);//scroll to bottom of the chat
       //getInbox();
     }
     catch(err) {
@@ -124,13 +152,11 @@ export default function ListingResults() {
         body: JSON.stringify(data)
       });
       const responseData = await response.json();
-  }
-  catch(err) {
+    }
+    catch(err) {
       console.log(err);
+    }
   }
-
-  }
-
 
   async function getInbox() {
     try {
@@ -149,12 +175,66 @@ export default function ListingResults() {
         console.log(err);
     }
   }
+  //1. send accept message
+  //2. add person to mates under listing
+  //3. delete space available
+  async function accept(req) {
+    try {
+      const token = await getTokenSilently();
+      const data = {
+        content: req.content,
+        lid : req.lid
+      }
+      const response = await fetch(`https://localhost:3000/private/send/read`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }, 
+        method: 'put', 
+        body: JSON.stringify(data)
+      });
+      const responseData = await response.json();
+    }
+    catch(err) {
+      console.log(err);
+    }
+
+  }
+  //delete message  
+  async function decline(req) {
+    try {
+      const token = await getTokenSilently();
+      const data = {
+        mid: req.mid,
+      }
+      const response = await fetch(`https://localhost:3000/private/send/inbox/delete`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }, 
+        method: 'put', 
+        body: JSON.stringify(data)
+      });
+      const responseData = await response.json();
+      setSel(null);
+    }
+    catch(err) {
+      console.log(err);
+    }
+
+  }
+  /**********************USE EFFECT************************************ */
   
   useEffect(() => {
     getInbox();
+    /**ENTERED A CHATROOM */
     if (sel!= null) {
       /**scroll to bottom */
-      scrollToBottom();
+      if (scroll) {
+        scrollToBottom(); 
+        if (scroll == 1) setScroll(scroll+1);
+        else setScroll(0);
+      }
       /**height */
       var temp = window.innerHeight - messageHeight.current.clientHeight-80;//appbar=66
       temp = vh(temp);
@@ -167,38 +247,123 @@ export default function ListingResults() {
       }
       if (unreadMid.length>0) markRead(unreadMid);
     }
-  })
+  },[sel])
+
   
 
+  /**HELPER FUNCTTIONS ********************************************/
   function vh(v) {
     var h = window.innerHeight;
     return (v / h) * 100;
   }
-  /**DISPLAY********************************************************* */
+  function formatTime(s) {
+    const message = new Date(s);
+    const now = new Date();
+    const nowDate0Time = (new Date( now.toISOString().split("T")[0]) ).getTime();
+    const messageDate0Time = (new Date(s.split("T")[0])).getTime();
+    //same year, month, date
+    if (nowDate0Time == messageDate0Time) {//same date --> display time
+      return formatTwelveHourClock( message.getHours(), message.getMinutes());
+    }
+    else if ( nowDate0Time- messageDate0Time== (1000 * 60 * 60 * 24)) {//yesterday, display time
+      return "Yesterday " + formatTwelveHourClock( message.getHours(), message.getMinutes());
+    }
+    //weekday, time
+    else if (nowDate0Time- messageDate0Time < (1000 * 60 * 60 * 24*7)) {
+      return message.toString().split(" ")[0] + " " + formatTwelveHourClock( message.getHours(), message.getMinutes());
+    }
+    else {//display month, date, and time
+      return message.toString().split(" ")[1] + " " + message.getDate() + ", " + formatTwelveHourClock( message.getHours(), message.getMinutes());
+    }
+  }
+  function formatTwelveHourClock(hour, min) {
+    if (min < 10) min = "0"+min;
+    if (hour > 12) {
+      hour -= 12;
+      return hour+":"+min+" PM"
+    }
+    else {
+      return hour+":"+min+" AM"
+    }
+  }
+
+  /**CHAT DISPLAY********************************************************* */
+  const youReceivedRequest = (req) => (
+    <Grid container>
+      <Grid item>
+      <Typography variant="body2"color='textPrimary'>
+        You received a request for a {req.content.split(" ")[4]} {req.content.split(" ")[3]} at:
+      </Typography>
+      <Fab variant="extended"
+      className={classes.fab}
+      color='default' 
+      component={Link} 
+      to={`/listing/${req.lid}`}>
+        Go to listing
+      </Fab>
+      </Grid>
+    </Grid>
+  )
+
+
+  const displayReceivedRequestsSnackbar = () => (
+    <div  className={classes.snackBar}>
+    {receivedRequests.map((key, index) => (
+      <SnackbarContent 
+      key = {index}
+      message = {`Pending request: ${receivedRequests[index].content.split(" ")[4]} ${receivedRequests[index].content.split(" ")[3]}`}
+      action={
+      <Grid container alignItems='center'>
+        <Grid item>
+          <Button color='primary' onClick={() => accept(receivedRequests[index])}>Accept</Button>
+        </Grid>
+        <Grid item>
+          <Button color='inherit' onClick={() => decline(receivedRequests[index])}>Decline</Button>
+        </Grid>
+        <Grid item>
+          <IconButton color='inherit' onClick={() => closeSnackBar(index)}><CloseIcon/></IconButton>
+        </Grid>
+    </Grid>
+      }/>
+    ))}
+    </div>
+  )
+
   const displaySelConvo = (sel) => (
     <Grid container direction="column-reverse">
       {convo[sel].map((key, index) => (
         <Grid item key={index}>
-        {convo[sel][index].from[1] == 'You' && (
+          {/**SENT BY YOU */}
+        {convo[sel][index].from[1] == 'You' && convo[sel][index].type == 'message' && (
           <Grid container direction='row' justify='flex-end'>
             <Grid item >
             <Paper elevation={3} className={classes.bubble} style={{backgroundColor: '#6FB2E3'}}>
                 <Typography variant="body2"color='textPrimary' >
                 {convo[sel][index].content}
                 </Typography>
+                <Typography variant="caption"color='textSecondary' >
+                {formatTime(convo[sel][index].time)}
+                </Typography>
             </Paper>
             </Grid>
-            
           </Grid>
         )}
+        {/**SENT BY OTHER PERSON */}
         {convo[sel][index].from[1] != 'You' && (
           <Grid container>
-            <Grid item><Avatar alt="Profile Picture"/></Grid>
+            <Grid item><Avatar className={classes.listItem} alt="Profile Picture"/></Grid>
             <Grid item >
               <Paper elevation={3} className={classes.bubble}>
+                {/**type = message */}
+                {convo[sel][index].type == 'message' &&(
                 <Typography variant="body2"color='textPrimary' >
                 {convo[sel][index].content}
                 </Typography>
+                )}
+                {/**type = request */}
+                {convo[sel][index].type == 'request' &&(
+                youReceivedRequest(convo[sel][index])
+                )}
               </Paper>
             </Grid>
           </Grid>
@@ -216,16 +381,15 @@ export default function ListingResults() {
     <div className={classes.root}>
       <Paper square className={classes.body}>
         <Paper square elevation={0} className={classes.innerBody}>
-        <List className={classes.list}>
+        <List>
           {Object.keys(convo).map( (keyName, index) => (
           <React.Fragment key={index}>
           <ListItem 
             button
             onClick={() => handleClickOpen(keyName)}
           >
-          <Grid item xs={12} sm container className={classes.listItem}>
-            <Grid item xs container direction="column" spacing={2}>
-              <Grid item xs> {/**TITLE = THE OTHER PERSON */}
+            <Grid container alignItems='center' spacing={2} className={classes.listItem}>
+              <Grid item xs={2}> {/**TITLE = THE OTHER PERSON */}
               {/**last message from other person and is unread */}
               {/** convo[keyName][0].from[1] != 'You' && convo[keyName][0].read == 0 */}
                 {convo[keyName][0].read == 0 && (
@@ -256,12 +420,11 @@ export default function ListingResults() {
                   </Typography>
                 )}
               </Grid>
-            </Grid>
-            <Grid item>
+              <Grid item> {/**DATE */} 
               <Typography variant="body2" color="textSecondary">
-                {convo[keyName][0].time}
+                {formatTime(convo[keyName][0].time)}
               </Typography>
-            </Grid>            
+              </Grid>        
           </Grid>
           </ListItem>
           </React.Fragment>
@@ -276,9 +439,11 @@ export default function ListingResults() {
         <div className={classes.body}>
           {/**CHATT HISTORY */}
           <Container style={{height: `${chatroomHeight}`}} className={classes.chatroom}>
+          {displayReceivedRequestsSnackbar()}
           {displaySelConvo(sel)}
           <div ref = {messagesEndRef} />
           </Container>
+
           {/**SEND MESSAGE */}
           <Container>
             <Grid container alignItems="flex-end" justify="center">

@@ -1,6 +1,15 @@
 const sql = require('../index');
 var db = {};
 
+db.deleteMessage = (mid) => {
+    return new Promise ((res, rej) => {
+        sql.query('DELETE FROM messages WHERE mid = ?', [mid] , (err, results) => {
+            if (err) return rej(err);
+            return res(results);
+        })
+    })
+}
+
 db.readMessage = (midArr) => {
     return new Promise ((res, rej) => {
         sql.query('UPDATE messages SET `read` = ? WHERE mid IN (?)', [1, midArr] , (err, results) => {
