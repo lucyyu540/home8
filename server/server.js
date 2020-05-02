@@ -7,9 +7,8 @@ const indexRouter = require("./routes/index");
 const privateRouter = require('./routes/private');
 const db = require('./db/index');
 const users = require('./db/table/users')
-const favoriteListings = require('./db/table/favoriteListings')
 const personalityAs = require('./db/table/personalityAs');
-
+const filter = require('./db/table/filter');
 
 /**MODULES */
 const bodyParser = require('body-parser');//access req.body
@@ -44,20 +43,22 @@ async function checkUsers(req, res, next) {
     const email = req.user['https://home8-api.com/email'];
 	try{
 		const user = await users.getUserByUserid(userid);
-		console.log('middleware found user', user);
-		next();
-	}
-	catch (err) {
-		console.log('creating new user')
-		try {
-			const user = await users.createNewUser(userid, email, username);
-			const favorites = await favoriteListings.createNewUser(userid);
-			const answers = await personalityAs.createNewUser(userid);
+		if (user) {
+			console.log('(middleware) user exists');
 			next();
 		}
-		catch(err) {
-			res.json(err);
+		else {
+			console.log('creating new user');
+			await users.createNewUser(userid, email, username);
+			await personalityAs.createNewUser(userid);
+			await filter.createUser(userid);
+			next();
 		}
+		
+	}
+	catch (err) {
+		console.log('(middleware) error')
+		res.json(err);		
 	}
 }
 

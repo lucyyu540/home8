@@ -3,11 +3,14 @@ const express = require('express');
 const router = express.Router();
 const users = require('../db/table/users')
 const listings = require('../db/table/listings')
-const favoriteListings = require('../db/table/favoriteListings');
+const filter = require('../db/table/filter');
 const personalityAs = require('../db/table/personalityAs');
 const personalityQs = require('../db/table/personalityQs');
 const sendRouter = require('./send');
-router.use('/send', sendRouter);
+const listingRouter = require('./listing')
+/**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MIDDLEWARE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+router.use('/send', sendRouter); 
+router.use('/listing', listingRouter); 
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 router.put('/listings',  async (req,res) => {
     const userid = req.user.sub;
@@ -24,9 +27,9 @@ router.put('/listings',  async (req,res) => {
     }
     //search in users
     try {
-        const favorites = await favoriteListings.getListingsByUserid(userid);
-        console.log('favorites: ', favorites);
         const results = await listings.getListingsByCoordinates(a,b,c,d);
+        const favorites = await filter.getFavorited(userid);
+        const ind = 0;
         for (var i = 0 ; i < results.length; i ++) {
             const owner = await users.getUsernameByUserid(results[i].owner);
             results[i].owner = [results[i].owner, owner];//owner username
@@ -39,6 +42,7 @@ router.put('/listings',  async (req,res) => {
                 }
                 results[i].mates = arr;
             }
+            /**String to array */
             /**price, roomType, rooming, fromDate, toDate */
             if (results[i].price) {
                 results[i].price = results[i].price.split(" ");
@@ -56,9 +60,21 @@ router.put('/listings',  async (req,res) => {
             }
 
             /**sort into favorites */
-            const lid = 'lid'+results[i].lid;
-            if (favorites[lid]) sorted.favorites.push(results[i]);
-            else sorted.public.push(results[i]);
+            var favorited = false;
+            for (var j = ind; j < favorites.length; j ++) {
+                if (results[i].lid == favorites[j].lid) {
+                    favorited = true;
+                    sorted.favorites.push(results[i]);
+                    ind ++;
+                    break;
+                }
+                else if (results[i].lid < favorites[j].lid){
+                    favorited = false;
+                    ind ++;
+                    break;
+                }
+            }
+            if (!favorited) sorted.public.push(results[i]);
         }
         console.log(sorted);
         res.json(sorted).end();
@@ -118,7 +134,7 @@ router.get('/listing/:lid', async (req, res) => {
         res.json(err);
     }
 });
-
+/**EDIT MY LISTINGS ************************************************************************ */
 router.get('/my-listings', async (req, res) => {
     const userid = req.user.sub;
     console.log('endpoint: private/my-listings', userid);
@@ -148,9 +164,7 @@ router.get('/my-listings', async (req, res) => {
                 results[i].fromDate = [];
                 results[i].toDateArr = [];
             }
-        }
-            
-        console.log(results);
+        }            
         res.json(results);
     }
     catch(err) {
@@ -161,10 +175,10 @@ router.get('/my-listings', async (req, res) => {
 router.put('/create-listing', async (req, res) => {
     const userid = req.user.sub;
     console.log('endpoint: private/create-listing' , userid);
-    var mates = '';
-    for (var i = 0; i < req.body.mates.length; i ++) {
-        if (i == 0) mates = req.body.mates[0][0];
-        else mates += " " + req.body.mates[i][0];
+    const mates = arrayToStringMates(req.body.mates);
+    if (mates) {
+        try {await filter.movein(mates);}//owner move in}
+        catch (err) {console.log(err);}
     }
     const price = arrayToString(req.body.price);
     const rooming = arrayToString(req.body.rooming);
@@ -203,13 +217,44 @@ router.put('/create-listing', async (req, res) => {
 })
 router.put('/update-listing', async (req, res) => {
     const userid = req.user.sub;
-    console.log('endpoint: private/updates-listing' , userid);
-    console.log(req.body);
-    var mates = '';
-    for (var i = 0; i < req.body.mates.length; i ++) {
-        if (i == 0) mates = req.body.mates[0][0];
-        else mates += " " + req.body.mates[i][0];
+    console.log('endpoint: private/update-listing' , userid);
+    const lid = parseInt(req.body.lid);
+    const mates = arrayToStringMates(req.body.mates);
+    try {
+        var originalMates = await listings.getMatesByLid(lid);
+        if (originalMates != mates) {//find difference 
+            originalMates = originalMates.mates.split(" ");
+            map = {};
+            for (var i = 0 ; i < originalMates.length; i ++) {
+                map[originalMates[i]] = 1;
+            }
+            var deleteMates = [];
+            var addedMates = [];
+            for (var i = 0 ; i < req.body.mates.length; i ++) {
+                if (map[req.body.mates[i][0]]) delete map[req.body.mates[i][0]];//no change
+                else addedMates.push(req.body.mates[i][0]);//new
+            }
+            for (mate in map) {
+                if (mate) deleteMates.push(mate);//remaining --> deleted
+            }
+            console.log('deleted mates', deleteMates);
+            console.log('added mates', addedMates);
+            for (var i = 0 ; i < addedMates.length; i ++) {
+                filter.movein(addedMates[i], lid);
+            }
+            for (var i = 0 ; i < deleteMates.length; i ++) {
+                filter.moveout(deleteMates[i], lid);
+            }
+        }
     }
+    catch (err) {
+        console.log(err);
+    }
+    /** if mates were, deleted 1) notify 2) update filter table */
+    /** the only mate that can be added in this url is owner
+     * 1) no notification
+     * 2) update filter table
+     */
     const price = arrayToString(req.body.price);
     const rooming = arrayToString(req.body.rooming);
     const roomType = arrayToString(req.body.roomType);
@@ -246,6 +291,7 @@ router.put('/update-listing', async (req, res) => {
         res.end();
     }
 })
+/**PROFILE ************************************************************************ */
 /**PRIVATE PROFILE GIVEN USERNAME */
 router.put('/my-profile', async (req, res) => {
     const userid = req.user.sub;
@@ -341,7 +387,14 @@ router.put('/submit-answer', async (req, res) => {
         res.json(err);
     }
 })
-
+function arrayToStringMates(arr) {
+    var s = '';
+    for (var i = 0 ; i < arr.length; i ++) {
+        if (i == 0) s = arr[0][0];
+        else s += " " + arr[i][0];
+    }
+    return s;
+}
 function arrayToString(arr) {
     var s = '';
     for (var i = 0 ; i < arr.length; i ++) {

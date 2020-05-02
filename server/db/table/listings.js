@@ -14,6 +14,7 @@ db.getListingsByCoordinates = (a, b, c, d) => {
         });
     });
 }
+/** all listings owned by this user */
 db.getListingsByUserid = (userid) => {
     return new Promise((res, rej) => {
         sql.query('SELECT * FROM listings WHERE owner = ?', [userid] ,(err, results) => {
@@ -25,6 +26,7 @@ db.getListingsByUserid = (userid) => {
         });
     });
 }
+/** get a listing */
 db.getListingByLid = (lid) => {
     return new Promise((res, rej) => {
         sql.query('SELECT * FROM listings WHERE lid = ?', [lid] ,(err, results) => {
@@ -36,6 +38,23 @@ db.getListingByLid = (lid) => {
         });
     });
 }
+db.getMatesByLid = (lid) => {
+    return new Promise((res, rej) => {
+        sql.query('SELECT mates FROM listings WHERE lid = ?', [lid] ,(err, results) => {
+            if (err) return rej(err);
+            else return res(results[0]);//exists
+        });
+    });
+}
+db.getSpaceByLid = (lid) => {
+    return new Promise((res, rej) => {
+        sql.query('SELECT fromDate, toDate, price, rooming, roomType FROM listings WHERE lid = ?', [lid] ,(err, results) => {
+            if (err) return rej(err);
+            else return res(results[0]);//exists
+        });
+    });
+}
+/**CREATE */
 db.createListing = (data) => {
     return new Promise ((res, rej) => {
         console.log(data);
@@ -63,6 +82,24 @@ db.createListing = (data) => {
             return res(results);
         });
     })
+}
+/**EDIT */
+db.updateMates = (mates, lid) => {
+    return new Promise((res, rej) => {
+        sql.query('UPDATE listings SET mates =?  WHERE lid = ?', [mates, lid] ,(err, results) => {
+            if (err) return rej(err);
+            else return res(results);
+        });
+    });
+}
+db.updateSpace = (data, lid) => {
+    return new Promise((res, rej) => {
+        sql.query('UPDATE listings SET fromDate=?, toDate=?, price=?, rooming=?, roomType=? WHERE lid = ?', 
+        [data.fromDate, data.toDate, data.price, data.rooming, data.roomType, lid] ,(err, results) => {
+            if (err) return rej(err);
+            else return res(results);
+        });
+    });
 }
 db.updateListing = (data) => {
     return new Promise ((res, rej) => {

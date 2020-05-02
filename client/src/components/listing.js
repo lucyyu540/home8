@@ -112,14 +112,17 @@ console.log(sentReq);
       });
       const outboxData = await outboxResponse.json();
       var obj = {}
+      //for all requests user has made
       for (var i = 0 ; i < outboxData.length; i ++) {
-          if (outboxData[i].lid == lid) {
-              for (var index = 0 ; index < responseData.price.length; index ++) {
-                if (outboxData[i].content == responseData.fromDate[index]+ ' '+responseData.toDate[index]+ ' '+responseData.price[index]+ ' '+responseData.rooming[index]+ ' '+responseData.roomType[index]){
-                    obj[index] = 1;
-                    break;
-                }
+          if (outboxData[i].lid == lid) {//there is a req sent for a space in this listing
+            //for all available spaces in this listing
+            for (var index = 0 ; index < responseData.price.length; index ++) {
+              if (outboxData[i].content == responseData.fromDate[index]+ ' '+responseData.toDate[index]+ ' '+responseData.price[index]+ ' '+responseData.rooming[index]+ ' '+responseData.roomType[index]){
+                //if description matches, mark ith space as requested
+                if (obj[index]) continue;
+                else {obj[index] = 1; break;}
               }
+            }
           }
       }
       setSentReq(obj);

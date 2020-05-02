@@ -1,6 +1,6 @@
 const sql = require('../index');
 var db = {};
-
+/**EDIT */
 db.deleteMessage = (mid) => {
     return new Promise ((res, rej) => {
         sql.query('DELETE FROM messages WHERE mid = ?', [mid] , (err, results) => {
@@ -18,6 +18,7 @@ db.readMessage = (midArr) => {
         })
     })
 }
+/**GET */
 db.getUnread = (userid) => {
     return new Promise((res, rej) => {
         sql.query('SELECT * FROM messages WHERE `to` = ? AND `read` = ?', [userid, 0],(err, results) => {
@@ -51,7 +52,7 @@ db.getSentRequests = (userid) => {
         });
     });
 }
-
+/**CREATE */
 db.addMessage = (data) => {
     return new Promise ((res, rej) => {
         const time = new Date();

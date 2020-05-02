@@ -65,7 +65,6 @@ export default function ListingResults(props) {
   const [favoriteListings, setFavoriteListings] = React.useState([]);
   const [req, setReq] = React.useState(null);
   const [room, setRoom] = React.useState({});
-  console.log(req);
   useEffect(()=> {
     if (props.listings) setListings(props.listings);
     if (props.favoriteListings) setFavoriteListings(props.favoriteListings);
@@ -132,19 +131,20 @@ export default function ListingResults(props) {
   function handleClickOpen(i){
     props.updateSelected(listings[i].lid);
     setInd(i);
+    var temp = {}
+    //for all requests user has made 
     for (var j = 0 ; j < req.length; j ++) {
-      if (req[j].lid == listings[i].lid) {
-        var temp = room;
-        /** check if user has requested for any of the spaces in this listing */
+      if (req[j].lid == listings[i].lid) {//if requested for a space in this listing
+        //for all available spaces in this listing
         for (var index = 0 ; index < listings[i].price.length; index ++) {
           if (req[j].content == listings[i].fromDate[index]+ ' '+listings[i].toDate[index]+ ' '+listings[i].price[index]+ ' '+listings[i].rooming[index]+ ' '+listings[i].roomType[index]){
-            temp[index] = 1;
-            break;
+            if (temp[index]) continue; 
+            else {temp[index] = 1; break;}
           }
-        }
-        setRoom(temp);
+        }         
       }
     }
+    setRoom(temp);
     setOn(true);
   }
   function handleClose() {

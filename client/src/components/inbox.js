@@ -183,7 +183,9 @@ export default function ListingResults() {
       const token = await getTokenSilently();
       const data = {
         content: req.content,
-        lid : req.lid
+        lid : req.lid,
+        mid : req.mid,
+        from : req.from[0]
       }
       const response = await fetch(`https://localhost:3000/private/send/read`, {
         headers: {
@@ -247,7 +249,7 @@ export default function ListingResults() {
       }
       if (unreadMid.length>0) markRead(unreadMid);
     }
-  },[sel])
+  })
 
   
 
@@ -257,10 +259,14 @@ export default function ListingResults() {
     return (v / h) * 100;
   }
   function formatTime(s) {
-    const message = new Date(s);
-    const now = new Date();
-    const nowDate0Time = (new Date( now.toISOString().split("T")[0]) ).getTime();
-    const messageDate0Time = (new Date(s.split("T")[0])).getTime();
+    //s --> in universal time zone
+    const tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+    const message = new Date(s);//convertd to local time zone
+    const messageISO = (new Date(new Date(s) - tzoffset)).toISOString();
+    const nowISO = (new Date(Date.now() - tzoffset)).toISOString();
+
+    const nowDate0Time = new Date( nowISO.split("T")[0] ).getTime();
+    const messageDate0Time = new Date( messageISO.split("T")[0] ).getTime();
     //same year, month, date
     if (nowDate0Time == messageDate0Time) {//same date --> display time
       return formatTwelveHourClock( message.getHours(), message.getMinutes());
@@ -311,18 +317,39 @@ export default function ListingResults() {
     {receivedRequests.map((key, index) => (
       <SnackbarContent 
       key = {index}
-      message = {`Pending request: ${receivedRequests[index].content.split(" ")[4]} ${receivedRequests[index].content.split(" ")[3]}`}
+      message = {
+        <Grid container direction='column'>
+          <Grid item>
+            <Typography variant='body2'>
+            Pending request:
+            </Typography>
+          </Grid>
+          <Grid item style={{marginLeft:3}}>
+            <Typography 
+            color='primary'
+            variant='body2'
+            component={Link} 
+            to={`/listing/${receivedRequests[index].lid}`}>
+            {receivedRequests[index].content.split(" ")[4]} {receivedRequests[index].content.split(" ")[3]}
+            </Typography>
+          </Grid>
+        </Grid>
+      }
       action={
-      <Grid container alignItems='center'>
-        <Grid item>
-          <Button color='primary' onClick={() => accept(receivedRequests[index])}>Accept</Button>
-        </Grid>
-        <Grid item>
-          <Button color='inherit' onClick={() => decline(receivedRequests[index])}>Decline</Button>
-        </Grid>
-        <Grid item>
-          <IconButton color='inherit' onClick={() => closeSnackBar(index)}><CloseIcon/></IconButton>
-        </Grid>
+      <Grid container direction='column' justify='flex-end'>
+        <Grid item>{/**row 1 */}<Grid container justify='flex-end'>
+          <Grid item>
+            <IconButton color='inherit' onClick={() => closeSnackBar(index)}><CloseIcon/></IconButton>
+          </Grid>
+        </Grid></Grid>
+        <Grid item> {/**row 2 */}<Grid container alignItems='center'>
+           <Grid item>
+              <Button color='primary' onClick={() => accept(receivedRequests[index])}>Accept</Button>
+          </Grid>
+          <Grid item>
+            <Button color='primary' onClick={() => decline(receivedRequests[index])}>Decline</Button>
+          </Grid>
+        </Grid></Grid>
     </Grid>
       }/>
     ))}

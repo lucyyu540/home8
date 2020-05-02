@@ -18,7 +18,7 @@ db.getUsernameByUserid = (userid) => {
             if (results.length > 0) {
                 return res(results[0].username);//exists
             }
-            return rej(err);
+            return null;
         });
     });
 }
@@ -30,7 +30,7 @@ db.getUserByUserid = (userid) => {
             if (results.length > 0) {
                 return res(results[0]);//exists
             }
-            return rej(err);
+            return null;
         });
     });
 }
@@ -42,7 +42,7 @@ db.getUserByUsername = (username) => {
             if (results.length > 0) {
                 return res(results[0]);//exists
             }
-            return rej(err);
+            return null;
         });
     });
 }
@@ -54,7 +54,7 @@ db.getProtectedUserByUsername = (username) => {
             if (results.length > 0) {
                 return res(results[0]);//exists
             }
-            return rej(err);
+            return null;
         });
     });
 
@@ -67,7 +67,7 @@ db.getUserIdByEmail = (email) => {
             if (results.length > 0) {
                 return res(results[0]);//exists
             }
-            return rej(err);
+            return null;
         });
     });
 }
@@ -75,7 +75,7 @@ db.createNewUser = (userid, email, username) => {
     return new Promise ((res, rej) => {
         sql.query('INSERT INTO users (userid, email, username) VALUES (?)', [[userid, email, username]] , (err, results) => {
             if (err) return rej(err);
-            return res(results[0]);
+            return res(results);
         })
     })
 }

@@ -44,7 +44,7 @@ db.createNewUser = (userid) => {
     return new Promise ((res, rej) => {
         sql.query('INSERT INTO personalityAs (userid, x) VALUES (?,1)', [userid] , (err, results) => {
             if (err) return rej(err);
-            return res(results[0]);
+            return res(results);
         })
     })
 }
@@ -52,7 +52,7 @@ db.addColumn = (n) => {
     return new Promise ((res, rej) => {
         sql.query('ALTER TABLE personalityAs ADD COLUMN qid? INT(1)', [n] , (err, results) => {
             if (err) return rej(err);
-            return res(results[0]);
+            return res(results);
         })
     })
 }

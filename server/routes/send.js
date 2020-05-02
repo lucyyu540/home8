@@ -3,9 +3,7 @@ const express = require('express');
 const router = express.Router();
 const users = require('../db/table/users')
 const listings = require('../db/table/listings')
-const favoriteListings = require('../db/table/favoriteListings');
-const personalityAs = require('../db/table/personalityAs');
-const personalityQs = require('../db/table/personalityQs');
+const filter = require('../db/table/filter');
 const messages = require('../db/table/messages');
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /**SEND REQUEST */
@@ -154,19 +152,4 @@ function arrayToString(arr) {
     }
     return s;
 }
-function euclideanDistance(A, B) {
-    var sum = 0;
-    var maxDistance = 0;
-    for (var i = 2 ; i < A.length; i ++) {
-        if (A[i] || B[i]) break;
-        sum += Math.pow(A[i] - B[i], 2);//(a-b)^2
-        maxDistance += 16;
-    }
-    var distance = Math.sqrt(sq);
-    maxDistance = Math.sqrt(maxDistance);
-    if (maxDistance == 0) return 0;
-    const percentage = (distance/maxDistance);
-    return (1-percentage)*100;
-}
-
 module.exports = router;
