@@ -37,7 +37,7 @@ db.movein = (mate, lid) => {
 }
 db.favorite = (mate, lid) => {
     return new Promise ((res, rej) => {
-        sql.query('UPDATE filter SET ? = ? WHERE lid = ?', [mate, 3, lid] , (err, results) => {
+        sql.query('UPDATE filter SET `'+mate+'`=? WHERE lid = ?', [3, lid] , (err, results) => {
             if (err) return rej(err);
             return res(results);
         })

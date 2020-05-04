@@ -84,7 +84,7 @@ export default function NavBar() {
   async function getNotifications () {
     try{
       const token = await getTokenSilently();
-      const response = await fetch(`https://localhost:3000/private/send/inbox/unread`, {
+      const response = await fetch(`https://localhost:3000/private/notification/inbox/unread`, {
           headers: {
               Authorization: `Bearer ${token}`,
             }, 
@@ -93,7 +93,6 @@ export default function NavBar() {
       const data = await response.json();//unread messages
       const count = await data.length;//notifications count
       setNoti(count);
-      console.log(count);
     }
     catch(err) {
       console.log(err);

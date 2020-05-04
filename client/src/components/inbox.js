@@ -107,9 +107,15 @@ export default function ListingResults() {
     console.log(temp);
     setReceivedRequests(temp);
   }
+  function handleEnter(e) {
+    if (e.key == 'Enter'){
+      handleSend();
+    }   
+  }
   /**API CALLS********************************************************** */
+  
   async function handleSend() {
-    console.log('send clicked');
+    console.log('send clicked or enter pressed');
     try{
       var to;
       if (convo[sel][0].from[1] == 'You') to = convo[sel][0].to[0];
@@ -119,7 +125,7 @@ export default function ListingResults() {
           to: to,
           content: newMessage,
       }
-      const response = await fetch(`https://localhost:3000/private/send/message`, {
+      const response = await fetch(`https://localhost:3000/private/notification/message`, {
           headers: {
               Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json'
@@ -137,13 +143,19 @@ export default function ListingResults() {
 
   }
 
-  async function markRead(unreadMid) {
+  async function markRead() {
+    var unreadMid = [];
+    for (var i = 0 ; i < convo[sel].length; i ++) {
+      if (convo[sel][i].read == 0) unreadMid.push(convo[sel][i].mid);
+      else break;
+    }
+    if (unreadMid.length==0) return;
     try {
       const token = await getTokenSilently();
       const data = {
         unreadMid: unreadMid
       }
-      const response = await fetch(`https://localhost:3000/private/send/read`, {
+      const response = await fetch(`https://localhost:3000/private/notification/read`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -161,7 +173,7 @@ export default function ListingResults() {
   async function getInbox() {
     try {
         const token = await getTokenSilently();
-        const response = await fetch(`https://localhost:3000/private/send/inbox`, {
+        const response = await fetch(`https://localhost:3000/private/notification/inbox`, {
             headers: {
                 Authorization: `Bearer ${token}`,
               }, 
@@ -179,6 +191,7 @@ export default function ListingResults() {
   //2. add person to mates under listing
   //3. delete space available
   async function accept(req) {
+    console.log('accepting request', req);
     try {
       const token = await getTokenSilently();
       const data = {
@@ -187,7 +200,7 @@ export default function ListingResults() {
         mid : req.mid,
         from : req.from[0]
       }
-      const response = await fetch(`https://localhost:3000/private/send/read`, {
+      await fetch(`https://localhost:3000/private/listing/accept`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -195,7 +208,6 @@ export default function ListingResults() {
         method: 'put', 
         body: JSON.stringify(data)
       });
-      const responseData = await response.json();
     }
     catch(err) {
       console.log(err);
@@ -209,7 +221,7 @@ export default function ListingResults() {
       const data = {
         mid: req.mid,
       }
-      const response = await fetch(`https://localhost:3000/private/send/inbox/delete`, {
+      await fetch(`https://localhost:3000/private/notification/inbox/delete`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -217,8 +229,7 @@ export default function ListingResults() {
         method: 'put', 
         body: JSON.stringify(data)
       });
-      const responseData = await response.json();
-      setSel(null);
+      if (convo[sel].length == 1) setSel(null);
     }
     catch(err) {
       console.log(err);
@@ -231,25 +242,20 @@ export default function ListingResults() {
     getInbox();
     /**ENTERED A CHATROOM */
     if (sel!= null) {
-      /**scroll to bottom */
       if (scroll) {
+        /**height */
+        var temp = window.innerHeight - messageHeight.current.clientHeight-80;//appbar=66
+        temp = vh(temp);
+        setChatroomHeight(temp+'vh');
+        //scroll
         scrollToBottom(); 
         if (scroll == 1) setScroll(scroll+1);
         else setScroll(0);
       }
-      /**height */
-      var temp = window.innerHeight - messageHeight.current.clientHeight-80;//appbar=66
-      temp = vh(temp);
-      setChatroomHeight(temp+'vh');
       /**look for unread messages from this person */
-      var unreadMid = [];
-      for (var i = 0 ; i < convo[sel].length; i ++) {
-        if (convo[sel][i].read == 0) unreadMid.push(convo[sel][i].mid);
-        else break;
-      }
-      if (unreadMid.length>0) markRead(unreadMid);
+      markRead();
     }
-  })
+  },[])
 
   
 
@@ -344,10 +350,16 @@ export default function ListingResults() {
         </Grid></Grid>
         <Grid item> {/**row 2 */}<Grid container alignItems='center'>
            <Grid item>
-              <Button color='primary' onClick={() => accept(receivedRequests[index])}>Accept</Button>
+              <Button color='primary' onClick={() => {
+                accept(receivedRequests[index]);
+                closeSnackBar(index);
+              }}>Accept</Button>
           </Grid>
           <Grid item>
-            <Button color='primary' onClick={() => decline(receivedRequests[index])}>Decline</Button>
+            <Button color='primary' onClick={() => {
+              decline(receivedRequests[index]); 
+              closeSnackBar(index);
+              }}>Decline</Button>
           </Grid>
         </Grid></Grid>
     </Grid>
@@ -482,6 +494,7 @@ export default function ListingResults() {
                 rows={10}
                 value={newMessage}
                 onChange={handleNewMessage}
+                onKeyPress={handleEnter}
                 variant='outlined'
                 InputProps={{
                   endAdornment: (

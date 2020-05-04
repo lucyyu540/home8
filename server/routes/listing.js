@@ -9,67 +9,65 @@ const personalityQs = require('../db/table/personalityQs');
 const messages = require('../db/table/messages');
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /**ACCEPT USER  */
-router.put('/decline', async (req, res) => {
-    const userid = req.user.sub;
-    console.log('endpoint: private/listing/decline', userid);
-    const mid = parseInt(req.body.mid);
-    try {
-        await messages.deleteMessage(mid);
-    }
-    catch (err) {
-        console.log(err);
-        res.end();
-    }
-});
-
 router.put('/accept', async (req, res) => {
     const userid = req.user.sub;
     console.log('endpoint: private/listing/accept', userid);
     const lid = parseInt(req.body.lid);
     const mid = parseInt(req.body.mid);
+    const from = req.body.from;
+    const content = req.body.content.split(" ");
     //search in users
     try {
-        var mates = await listings.getMatesByLid(lid); //get original mates
-        mates += " " + req.body.from; //add mate
+        var data = await listings.getListingByLid(lid);
+        var mates = data.mates //get original mates
+        if (mates) mates += " " + from; //request from mate
+        else mates = from;
         await listings.updateMates(mates, lid);//update listings mates
-        var data = await listings.getSpaceByLid(lid);//get original space
+        console.log('mates added: ', mates);
         /**delete this space availability */
         var fromDate = data.fromDate.split(" ");
         var toDate = data.toDate.split(" ");
         var price = data.price.split(" ");
         var rooming = data.rooming.split(" ");
         var roomType = data.roomType.split(" ");
-        const content = req.body.content.split(" ");
-        for (var i = 0 ; i < price.length; i ++) {
+        var len = price.length;
+        for (var i = 0 ; i < len; i ++) {
             if (fromDate[i] == content[0] && 
                 toDate[i] == content[1] &&
                 price[i] == content[2] &&
                 rooming[i] == content[3] &&
                 roomType[i] == content[4]) {
-                    data.fromDate = data.fromDate.split(" ").splice(i,1);
-                    data.toDate = data.toDate.split(" ").splice(i,1);
-                    data.price = data.price.split(" ").splice(i,1);
-                    data.rooming = data.rooming.split(" ").splice(i,1);
-                    data.roomType = data.roomType.split(" ").splice(i,1);
+                    console.log('found splice index', i);
+                    fromDate.splice(i,1);
+                    toDate.splice(i,1);
+                    price.splice(i,1);
+                    rooming.splice(i,1);
+                    roomType.splice(i,1);
+                    break;
                 }
         }
-        data.fromDate = arrayToString(data.fromDate);
-        data.toDate = arrayToString(data.toDate);
-        data.price = arrayToString(data.price);
-        data.rooming = arrayToString(data.rooming);
-        data.roomType = arrayToString(data.roomType);
+        data.fromDate = arrayToString(fromDate);
+        data.toDate = arrayToString(toDate);
+        data.price = arrayToString(price);
+        data.rooming = arrayToString(rooming);
+        data.roomType = arrayToString(roomType);
         await listings.updateSpace(data, lid);//update space
-        await filter.movein(req.body.from, lid);//update filter
+        console.log('space updated', data);
+        await filter.movein(from, lid);//update filter
+        console.log('filter table updated');
         await messages.deleteMessage(mid);//delete request 
+        console.log('request message deleted');
         const message = {
             from: userid,
-            to: req.body.from, //person who sent the request
+            to: from, //person who sent the request
             type: 'message',
             lid: lid,
-            content: 'You have been added as a resident. Go to my roomings to access your residency details.'
+            content: 'You have been added as a mate at ' + data.address +
+            ' in the listed space,  ' + content[4] + ' ' + content[3] +            
+            '. Go to My Roomings page to access your residency details.'
         }
         await messages.addMessage(message);//send accept message
-        console.log(result);
+        console.log('request accept message sent');
         res.end();
     }
     catch (err) {

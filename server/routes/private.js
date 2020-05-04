@@ -6,10 +6,10 @@ const listings = require('../db/table/listings')
 const filter = require('../db/table/filter');
 const personalityAs = require('../db/table/personalityAs');
 const personalityQs = require('../db/table/personalityQs');
-const sendRouter = require('./send');
+const notificationRouter = require('./notification');
 const listingRouter = require('./listing')
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MIDDLEWARE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-router.use('/send', sendRouter); 
+router.use('/notification', notificationRouter); 
 router.use('/listing', listingRouter); 
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 router.put('/listings',  async (req,res) => {

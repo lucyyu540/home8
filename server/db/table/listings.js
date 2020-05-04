@@ -7,10 +7,8 @@ db.getListingsByCoordinates = (a, b, c, d) => {
         const latCondition = ' AND latitude >= '+b+' AND latitude <='+d;
         sql.query('SELECT * FROM listings WHERE active = 1 AND'+ longCondition +latCondition ,(err, results) => {
             if (err) return rej(err);
-            if (results.length > 0) {
-                return res(results);//exists
-            }
-            return rej(err);
+            else return res(results);
+            
         });
     });
 }
@@ -19,10 +17,7 @@ db.getListingsByUserid = (userid) => {
     return new Promise((res, rej) => {
         sql.query('SELECT * FROM listings WHERE owner = ?', [userid] ,(err, results) => {
             if (err) return rej(err);
-            if (results.length > 0) {
-                return res(results);//exists
-            }
-            return rej(err);
+            else return res(results);//exists
         });
     });
 }
@@ -34,7 +29,7 @@ db.getListingByLid = (lid) => {
             if (results.length > 0) {
                 return res(results[0]);//exists
             }
-            return rej(err);
+            return null;
         });
     });
 }
@@ -42,7 +37,8 @@ db.getMatesByLid = (lid) => {
     return new Promise((res, rej) => {
         sql.query('SELECT mates FROM listings WHERE lid = ?', [lid] ,(err, results) => {
             if (err) return rej(err);
-            else return res(results[0]);//exists
+            if (results.length> 0) return res(results[0].mates);//exists
+            return null;
         });
     });
 }
@@ -50,7 +46,8 @@ db.getSpaceByLid = (lid) => {
     return new Promise((res, rej) => {
         sql.query('SELECT fromDate, toDate, price, rooming, roomType FROM listings WHERE lid = ?', [lid] ,(err, results) => {
             if (err) return rej(err);
-            else return res(results[0]);//exists
+            if (results.length>0) return res(results[0]);//exists
+            return null;
         });
     });
 }

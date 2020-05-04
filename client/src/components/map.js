@@ -72,7 +72,6 @@ class Map extends Component {
 
   componentDidUpdate(nextProps, prevState) {
     //handle searched area view
-    console.log('component did update',this.props.searchCoordinates);
     if (this.props.searchCoordinates !== nextProps.searchCoordinates) {
       console.log('changed')
       this.setState(
@@ -97,7 +96,9 @@ class Map extends Component {
         }))
       });
       var vectorSource = new OlSourceVector({features:[]});
+      console.log('adding markers to map')
       for (var i = 0; i < this.props.listings.length ; i ++) {
+        console.log('lid', this.props.listings[i].lid);
         const coordinates = [this.props.listings[i].longitude, this.props.listings[i].latitude];
         const id = this.props.listings[i].lid;
         const marker = new OlFeature({
@@ -116,7 +117,7 @@ class Map extends Component {
     } 
     //enlarge hovered
     if (this.props.hovered) {
-      console.log('hovering', this.props.hovered)
+      console.log('hovering lid', this.props.hovered)
       this.olmap.getLayers().forEach(layer => {
         if (layer.get('title') == 'markers') {
           var iconStyle = new olStyleStyle({
@@ -131,7 +132,7 @@ class Map extends Component {
           });
           const source = layer.getSource();
           const feature = source.getFeatureById(this.props.hovered);
-          feature.setStyle(iconStyle);
+          if (feature) feature.setStyle(iconStyle);
         }
       });
     }
@@ -151,7 +152,7 @@ class Map extends Component {
           });
           const source = layer.getSource();
           const feature = source.getFeatureById(nextProps.hovered);
-          feature.setStyle(iconStyle);
+          if (feature) feature.setStyle(iconStyle);
         }
       });
     }   

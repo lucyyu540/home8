@@ -75,7 +75,7 @@ export default function ListingResults(props) {
   async function getSentRequests() {
     try {
       const token = await getTokenSilently();
-      const res = await fetch(`https://localhost:3000/private/send/outbox/requests`, {
+      const res = await fetch(`https://localhost:3000/private/notification/outbox/requests`, {
         headers: {
           Authorization: `Bearer ${token}`,
         }, 
@@ -102,7 +102,7 @@ export default function ListingResults(props) {
           rooming: rooming,
           roomType: roomType
       }
-      const response = await fetch(`https://localhost:3000/private/send/request`, {
+      const response = await fetch(`https://localhost:3000/private/notification/request`, {
           headers: {
               Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json'
