@@ -27,10 +27,7 @@ db.getUserByUserid = (userid) => {
     return new Promise((res, rej) => {
         sql.query('SELECT * FROM users WHERE userid = ?',[userid], (err, results) => {
             if (err) return rej(err);
-            if (results.length > 0) {
-                return res(results[0]);//exists
-            }
-            return null;
+            return res(results[0]);//exists
         });
     });
 }
@@ -39,10 +36,7 @@ db.getUserByUsername = (username) => {
     return new Promise((res, rej) => {
         sql.query('SELECT * FROM users WHERE username = ?',[username], (err, results) => {
             if (err) return rej(err);
-            if (results.length > 0) {
-                return res(results[0]);//exists
-            }
-            return null;
+            return res(results[0]);//exists
         });
     });
 }
@@ -51,10 +45,7 @@ db.getProtectedUserByUsername = (username) => {
     return new Promise((res, rej) => {
         sql.query('SELECT username, firstName, lastName, gender, nationality, dob FROM users WHERE username = ?',[username], (err, results) => {
             if (err) return rej(err);
-            if (results.length > 0) {
-                return res(results[0]);//exists
-            }
-            return null;
+            return res(results[0]);//exists
         });
     });
 
@@ -64,10 +55,7 @@ db.getUserIdByEmail = (email) => {
     return new Promise((res, rej) => {
         sql.query('SELECT userid FROM users WHERE email = ?',[email], (err, results) => {
             if (err) return rej(err);
-            if (results.length > 0) {
-                return res(results[0]);//exists
-            }
-            return null;
+            return res(results[0]);//exists
         });
     });
 }
@@ -82,10 +70,7 @@ db.createNewUser = (userid, email, username) => {
 db.updateUsername = (id, username) => {
     return new Promise ((res, rej) => {
         sql.query('UPDATE users SET username = ? WHERE userid = ?', [username, id] , (err, results) => {
-            if (err) {
-                console.log(err);
-                return rej(err);
-            }
+            if (err) return rej(err);
             return res(results);
         })
     })

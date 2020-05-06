@@ -1,43 +1,39 @@
 const sql = require('../index');
 var db = {};
-/**CREATE */
-db.createListing = () => {
-    return new Promise((res, rej) => {
-        sql.query('INSERT INTO filter () VALUES ()',(err, results) => {
-            if (err) return rej(err);
-            else return res(results);
-        });
-    });
-}
-
-db.createUser = (userid) => {
-    return new Promise ((res, rej) => {
-        sql.query('ALTER TABLE filter ADD COLUMN `?` VARCHAR(45)', [userid] , (err, results) => {
-            if (err) return rej(err);
-            return res(results);
-        })
-    })
-}
 /** EDIT */
-db.moveout = (mate, lid) => {
+db.moveout = (userid, lid) => {
     return new Promise ((res, rej) => {
-        sql.query('UPDATE filter SET `'+mate+'`=? WHERE lid = ?', [2, lid] , (err, results) => {
+        sql.query('UPDATE filter SET current=?, past=? WHERE lid=? AND userid = ?', [0,1,lid, userid] , (err, results) => {
             if (err) return rej(err);
             return res(results);
         })
     })
 }
-db.movein = (mate, lid) => {
+db.movein = (userid, lid) => {
     return new Promise ((res, rej) => {
-        sql.query('UPDATE filter SET `'+mate+'`=? WHERE lid = ?', [1, lid] , (err, results) => {
+        sql.query('INSERT INTO filter (lid, userid, current) VALUES (?,?,?)'+
+        'ON DUPLICATE KEY UPDATE current=?, past=?', 
+        [lid, userid, 1, 1, 0], (err, results) => {
             if (err) return rej(err);
             return res(results);
         })
     })
 }
-db.favorite = (mate, lid) => {
+db.favorite = (userid, lid) => {
     return new Promise ((res, rej) => {
-        sql.query('UPDATE filter SET `'+mate+'`=? WHERE lid = ?', [3, lid] , (err, results) => {
+        sql.query('INSERT INTO filter (lid, userid, favorite) VALUES(?,?,?)'+
+        'ON DUPLICATE KEY UPDATE favorite=?', 
+        [lid, userid, 1,1] , (err, results) => {
+            if (err) return rej(err);
+            return res(results);
+        })
+    })
+}
+db.unfavorite = (userid, lid) => {
+    return new Promise ((res, rej) => {
+        sql.query('INSERT INTO filter (lid, userid, favorite) VALUES(?,?,?)'+
+        'ON DUPLICATE KEY UPDATE favorite=?', 
+        [lid, userid, 0,0] , (err, results) => {
             if (err) return rej(err);
             return res(results);
         })
@@ -46,7 +42,7 @@ db.favorite = (mate, lid) => {
 /**GET */
 db.getFavorited = (userid) => {
     return new Promise ((res, rej) => {
-        sql.query('SELECT lid FROM filter WHERE ?=?', [userid,3] , (err, results) => {
+        sql.query('SELECT lid FROM filter WHERE userid=? AND favorite=?', [userid,1] , (err, results) => {
             if (err) return rej(err);
             return res(results);
         })
@@ -54,7 +50,7 @@ db.getFavorited = (userid) => {
 }
 db.getPastResidence = (userid) => {
     return new Promise ((res, rej) => {
-        sql.query('SELECT lid FROM filter WHERE ?=?', [userid,2] , (err, results) => {
+        sql.query('SELECT lid FROM filter WHERE userid=? AND past=?', [userid,1] , (err, results) => {
             if (err) return rej(err);
             return res(results);
         })
@@ -62,7 +58,7 @@ db.getPastResidence = (userid) => {
 }
 db.getCurrentResidence = (userid) => {
     return new Promise ((res, rej) => {
-        sql.query('SELECT lid FROM filter WHERE ?=?', [userid,1] , (err, results) => {
+        sql.query('SELECT lid FROM filter WHERE userid=? AND current=?', [userid,1] , (err, results) => {
             if (err) return rej(err);
             return res(results);
         })

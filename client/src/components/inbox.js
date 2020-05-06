@@ -146,7 +146,7 @@ export default function ListingResults() {
   async function markRead() {
     var unreadMid = [];
     for (var i = 0 ; i < convo[sel].length; i ++) {
-      if (convo[sel][i].read == 0) unreadMid.push(convo[sel][i].mid);
+      if (convo[sel][i].read == 0 && convo[sel][i].to[0] == user.sub) unreadMid.push(convo[sel][i].mid);
       else break;
     }
     if (unreadMid.length==0) return;
@@ -252,10 +252,10 @@ export default function ListingResults() {
         if (scroll == 1) setScroll(scroll+1);
         else setScroll(0);
       }
-      /**look for unread messages from this person */
+      /**mark unread messages as read */
       markRead();
     }
-  },[])
+  },[convo])
 
   
 

@@ -6,11 +6,16 @@ const listings = require('../db/table/listings')
 const filter = require('../db/table/filter');
 const personalityAs = require('../db/table/personalityAs');
 const personalityQs = require('../db/table/personalityQs');
+const matesDB = require('../db/table/mates');
+
 const notificationRouter = require('./notification');
-const listingRouter = require('./listing')
+const listingRouter = require('./listing');
+const residenceRouter = require('./residence');
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MIDDLEWARE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 router.use('/notification', notificationRouter); 
 router.use('/listing', listingRouter); 
+router.use('/residence', residenceRouter); 
+
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 router.put('/listings',  async (req,res) => {
     const userid = req.user.sub;
@@ -134,7 +139,7 @@ router.get('/listing/:lid', async (req, res) => {
         res.json(err);
     }
 });
-/**EDIT MY LISTINGS ************************************************************************ */
+/**LISTINGS I OWN************************************************************************ */
 router.get('/my-listings', async (req, res) => {
     const userid = req.user.sub;
     console.log('endpoint: private/my-listings', userid);
@@ -223,15 +228,18 @@ router.put('/update-listing', async (req, res) => {
     try {
         var originalMates = await listings.getMatesByLid(lid);
         if (originalMates != mates) {//find difference 
-            originalMates = originalMates.mates.split(" ");
-            map = {};
-            for (var i = 0 ; i < originalMates.length; i ++) {
-                map[originalMates[i]] = 1;
-            }
+            var map = {};
+            if (originalMates) originalMates = originalMates.split(" ");
+            else originalMates = [];
+            for (var i = 0 ; i < originalMates.length; i ++) {map[originalMates[i]] = 1;}
             var deleteMates = [];
             var addedMates = [];
+            var unionMates = [];
             for (var i = 0 ; i < req.body.mates.length; i ++) {
-                if (map[req.body.mates[i][0]]) delete map[req.body.mates[i][0]];//no change
+                if (map[req.body.mates[i][0]]) {
+                    delete map[req.body.mates[i][0]];//no change
+                    unionMates.push(req.body.mates[i][0]);
+                }
                 else addedMates.push(req.body.mates[i][0]);//new
             }
             for (mate in map) {
@@ -239,9 +247,19 @@ router.put('/update-listing', async (req, res) => {
             }
             console.log('deleted mates', deleteMates);
             console.log('added mates', addedMates);
+            //new mates
             for (var i = 0 ; i < addedMates.length; i ++) {
                 filter.movein(addedMates[i], lid);
+            /**friending each other*/
+                for (var j = 0 ; j < unionMates.length; j ++) {
+                    matesDB.addMates(addedMates[i], unionMates[j]);
+                }
+                for (var j = i+1; j < addedMates.length; j ++) {
+                    matesDB.addedMates(addedMates[i], addedMates[j])
+                }
             }
+
+            //deleted mates
             for (var i = 0 ; i < deleteMates.length; i ++) {
                 filter.moveout(deleteMates[i], lid);
             }

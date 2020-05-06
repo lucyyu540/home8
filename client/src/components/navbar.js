@@ -149,7 +149,7 @@ export default function NavBar() {
     {isAuthenticated && (<Divider />)}
     {isAuthenticated &&(
        <List>
-         <ListItem button component={Link} to='/' key={'MyHomes'}>
+         <ListItem button component={Link} to='/my-homes' key={'MyHomes'}>
             <ListItemIcon><ListIcon /></ListItemIcon>
             <ListItemText primary={'My homes'} />
           </ListItem>

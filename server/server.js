@@ -8,7 +8,6 @@ const privateRouter = require('./routes/private');
 const db = require('./db/index');
 const users = require('./db/table/users')
 const personalityAs = require('./db/table/personalityAs');
-const filter = require('./db/table/filter');
 
 /**MODULES */
 const bodyParser = require('body-parser');//access req.body
@@ -37,21 +36,22 @@ var jwtCheck = jwt({
 }); 
 //checking with mysql
 async function checkUsers(req, res, next) {
-	console.log('in checkUsers middleware')
 	const userid = req.user.sub;
 	const username = req.user['https://home8-api.com/username'];
-    const email = req.user['https://home8-api.com/email'];
+	const email = req.user['https://home8-api.com/email'];
+	console.log('in checkUsers middleware', userid, username, email);
 	try{
 		const user = await users.getUserByUserid(userid);
+		console.log('user', user);
 		if (user) {
 			console.log('(middleware) user exists');
 			next();
 		}
 		else {
 			console.log('creating new user');
-			await users.createNewUser(userid, email, username);
-			await personalityAs.createNewUser(userid);
-			await filter.createUser(userid);
+			await users.createNewUser(userid, email, username);//create row
+			await personalityAs.createNewUser(userid);//create row
+			console.log('successfully created new user in mysql');
 			next();
 		}
 		

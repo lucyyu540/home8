@@ -98,6 +98,24 @@ db.updateSpace = (data, lid) => {
         });
     });
 }
+db.deactivate = (lid) => {
+    return new Promise((res, rej) => {
+        sql.query('UPDATE listings SET active = ? WHERE lid = ?', 
+        [0, lid] ,(err, results) => {
+            if (err) return rej(err);
+            else return res(results);
+        });
+    });
+}
+db.activate = (lid) => {
+    return new Promise((res, rej) => {
+        sql.query('UPDATE listings SET active = ? WHERE lid = ?', 
+        [1, lid] ,(err, results) => {
+            if (err) return rej(err);
+            else return res(results);
+        });
+    });
+}
 db.updateListing = (data) => {
     return new Promise ((res, rej) => {
         console.log(data);

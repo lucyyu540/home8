@@ -47,12 +47,13 @@ router.put('/message', async (req, res) => {
         console.log(err);      
     }
 })
+/** mark as read */
 router.put('/read', async (req, res) => {
     const userid = req.user.sub;
     console.log('endpoint: private/notification/read', userid);
     console.log('read mid', req.body.unreadMid);
     try {
-        const result = await messages.readMessage(req.body.unreadMid);
+        const result = await messages.readMessage(req.body.unreadMid, userid);
         res.json(result);
     }
     catch (err) {
@@ -108,7 +109,11 @@ router.get('/inbox', async (req, res) => {
         const results = await messages.getAll(userid);
         for (var i = results.length-1; i >= 0; i --) {//most recent first
             /**convert userid -> username */
-            if (results[i].from == userid) results[i].from = [results[i].from, 'You'];
+            console.log(results[i]);
+            if (results[i].from == userid) {
+                results[i].from = [results[i].from, 'You'];
+                if (results[i].type == 'request') continue;//dont show for requests sent
+            }
             else {
                 const from = await users.getUsernameByUserid(results[i].from);
                 results[i].from = [results[i].from, from];
@@ -118,6 +123,7 @@ router.get('/inbox', async (req, res) => {
                 const to = await users.getUsernameByUserid(results[i].to);
                 results[i].to = [results[i].to, to];
             }   
+            /**sort into conversations */
             var unique;
             if (results[i].from == userid) unique = results[i].to[1];
             else unique = results[i].from[1];

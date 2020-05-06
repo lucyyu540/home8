@@ -13,7 +13,7 @@ import history from "./utils/history";
 import EditProfile from './components/editProfile';
 import MyListings from "./components/myListings";
 import Listing from './components/listing';
-
+import MyHomes from './components/myHomes'
 /**STYLE*/
 import './App.css';
 import theme from './theme'
@@ -35,6 +35,7 @@ function App() {
           <PrivateRoute exact path="/:username/edit" component={EditProfile} />
           <PrivateRoute path="/my-listings/:lid" component={MyListings} />
           <PrivateRoute path="/inbox" component={Inbox} />
+          <PrivateRoute path = "/my-homes" component={MyHomes} />
           <Route exact path="/:username" component={Profile} />
         </Switch>
       </Router>

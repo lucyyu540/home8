@@ -10,9 +10,9 @@ db.deleteMessage = (mid) => {
     })
 }
 
-db.readMessage = (midArr) => {
+db.readMessage = (midArr, userid) => {
     return new Promise ((res, rej) => {
-        sql.query('UPDATE messages SET `read` = ? WHERE mid IN (?)', [1, midArr] , (err, results) => {
+        sql.query('UPDATE messages SET `read` = ? WHERE mid IN (?) AND `to`', [1, midArr,userid] , (err, results) => {
             if (err) return rej(err);
             return res(results);
         })
@@ -56,7 +56,9 @@ db.getSentRequests = (userid) => {
 db.addMessage = (data) => {
     return new Promise ((res, rej) => {
         const time = new Date();
-        sql.query('INSERT INTO messages (`from`, `to`, type, lid, content, time, `read`) VALUES (?)', [[data.from, data.to, data.type, data.lid, data.content, time, 0]] , (err, results) => {
+        sql.query('INSERT INTO messages (`from`, `to`, type, lid, content, time, `read`) VALUES (?)', 
+        [[data.from, data.to, data.type, data.lid, data.content, time, 0]] , 
+        (err, results) => {
             if (err) return rej(err);
             return res(results);
         })

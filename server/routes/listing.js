@@ -7,6 +7,7 @@ const filter = require('../db/table/filter');
 const personalityAs = require('../db/table/personalityAs');
 const personalityQs = require('../db/table/personalityQs');
 const messages = require('../db/table/messages');
+const matesDB = require('../db/table/mates');
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /**ACCEPT USER  */
 router.put('/accept', async (req, res) => {
@@ -19,8 +20,18 @@ router.put('/accept', async (req, res) => {
     //search in users
     try {
         var data = await listings.getListingByLid(lid);
+        if (data.owner != userid) return res.end();//only owner can accept request
+
         var mates = data.mates //get original mates
-        if (mates) mates += " " + from; //request from mate
+        if (mates) {
+            /**friending each other */
+            const matesArr = mates.split(" ");
+            for (var i = 0 ; i < matesArr.length; i ++) {
+                matesDB.addMates(from, matesArr[i]);
+            }
+            /**new string value */
+            mates += " " + from; //request from mate
+        }
         else mates = from;
         await listings.updateMates(mates, lid);//update listings mates
         console.log('mates added: ', mates);
@@ -46,6 +57,7 @@ router.put('/accept', async (req, res) => {
                     break;
                 }
         }
+        if (price.length == 0) listings.deactivate(lid);
         data.fromDate = arrayToString(fromDate);
         data.toDate = arrayToString(toDate);
         data.price = arrayToString(price);
@@ -64,7 +76,7 @@ router.put('/accept', async (req, res) => {
             lid: lid,
             content: 'You have been added as a mate at ' + data.address +
             ' in the listed space,  ' + content[4] + ' ' + content[3] +            
-            '. Go to My Roomings page to access your residency details.'
+            '. Go to My Homes page to access your residency details.'
         }
         await messages.addMessage(message);//send accept message
         console.log('request accept message sent');
