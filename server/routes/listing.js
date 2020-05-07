@@ -21,7 +21,10 @@ router.put('/accept', async (req, res) => {
     try {
         var data = await listings.getListingByLid(lid);
         if (data.owner != userid) return res.end();//only owner can accept request
-
+        console.log('verified owner of this listing');
+        const r = await matesDB.addMates(from, data.owner);//friend owner
+        console.log(r);
+        console.log('added friends ');
         var mates = data.mates //get original mates
         if (mates) {
             /**friending each other */

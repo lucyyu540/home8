@@ -92,6 +92,7 @@ export default function NavBar() {
       });
       const data = await response.json();//unread messages
       const count = await data.length;//notifications count
+      console.log(data);
       setNoti(count);
     }
     catch(err) {

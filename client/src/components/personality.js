@@ -46,10 +46,7 @@ const useStyles = makeStyles((theme) => ({
       margin: `${theme.spacing(4)}px `
     },
     list: {
-        textAlign:'center'
-    },
-    button: {
-      textAlign: 'center',
+        textAlign:'center',
     },
   }));
 export default function Personality(props) {
@@ -66,6 +63,16 @@ export default function Personality(props) {
       {
       "id": "incomplete",
       "label": "incomplete",
+      "value": 0,
+    } ]);
+    const [match, setMatch] = React.useState([{
+      "id": "pos",
+      "label": "pos",
+      "value": 0,
+      },
+      {
+      "id": "neg",
+      "label": "neg",
       "value": 0,
     } ]);
     /**API FUNCTIONS */
@@ -111,8 +118,18 @@ export default function Personality(props) {
             method: 'put', 
             body: JSON.stringify(data)
         });
-        const responseData = response.json();//similarity
-
+        const responseData = await response.json();//similarity
+        setMatch(
+          [{
+            "id": "pos",
+            "label": "pos",
+            "value": responseData.score,
+            },
+            {
+            "id": "neg",
+            "label": "neg",
+            "value": 100 - responseData.score,
+          } ]);
       }
       catch(err) {
         console.log(err);
@@ -184,9 +201,7 @@ export default function Personality(props) {
           motionDamping={15}
           isInteractive={false}          
       />
-  )
-
-    
+  )    
     const displayQuestion = () => (
       <div>
         <div style={ { height: '150px' }}>{pie(data)}</div>
@@ -262,9 +277,51 @@ export default function Personality(props) {
 
       </div>
     );
+    const matchPie = (match) => (
+      <ResponsivePie
+          data={match}
+          margin={{ top: 30, right: 30, bottom: 0, left: 30 }}
+          fit={false}
+          pixelRatio={2}
+          innerRadius={0.85}
+          colors={{ scheme: 'nivo' }}
+          borderWidth={1}
+          enableRadialLabels={false}
+          radialLabelsSkipAngle={10}
+          radialLabelsTextXOffset={6}
+          radialLabelsTextColor="#333333"
+          radialLabelsLinkOffset={0}
+          radialLabelsLinkDiagonalLength={16}
+          radialLabelsLinkHorizontalLength={24}
+          radialLabelsLinkStrokeWidth={1}
+          radialLabelsLinkColor={{ from: 'color' }}
+          enableSlicesLabels={false}
+          slicesLabelsSkipAngle={10}
+          slicesLabelsTextColor="#333333"
+          animate={true}
+          motionStiffness={90}
+          motionDamping={15}
+          isInteractive={false}          
+      />
+  )
     const displayComparison = () => (
       <div>
-
+        <div style={ { height: '50vh' }}>{matchPie(match)}</div>
+        <Grid container direction='column' alignItems='center'>
+          <Grid item>
+          <Paper className={classes.secondPaper}>
+            <Grid container justify='center'>
+              <Grid item>
+                <div style={{fontFamily:'digit', fontSize:'6vh'}}>
+                match: {match[0].value.toFixed(2)}%
+                </div>
+              </Grid>
+            </Grid>
+          </Paper>
+          </Grid>
+       
+        </Grid>
+        
       </div>
     );
 
@@ -278,10 +335,7 @@ export default function Personality(props) {
                     </div>
                   )}
                 {isAuthenticated && user.nickname != username&& (
-                    <div>
-                      get comparison
-                      {displayComparison()}
-                    </div>
+                    displayComparison()
                 )}
                 {!isAuthenticated && (
                     <div>

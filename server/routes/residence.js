@@ -24,7 +24,7 @@ router.get('/history', async (req, res) => {
         }
         for (var i = 0 ; i < mates.length; i ++) {
             const temp = await users.getUsernameByUserid(mates[i].friendid);
-            mates[i] = {id: mates[i], username: temp};
+            mates[i] = {id: mates[i].friendid, username: temp};
         }
         const result = {
             currentResidence : currentResidence,

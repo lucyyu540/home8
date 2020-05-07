@@ -39,10 +39,9 @@ async function checkUsers(req, res, next) {
 	const userid = req.user.sub;
 	const username = req.user['https://home8-api.com/username'];
 	const email = req.user['https://home8-api.com/email'];
-	console.log('in checkUsers middleware', userid, username, email);
+	//console.log('in checkUsers middleware', userid, username, email);
 	try{
 		const user = await users.getUserByUserid(userid);
-		console.log('user', user);
 		if (user) {
 			console.log('(middleware) user exists');
 			next();

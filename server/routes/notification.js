@@ -51,7 +51,6 @@ router.put('/message', async (req, res) => {
 router.put('/read', async (req, res) => {
     const userid = req.user.sub;
     console.log('endpoint: private/notification/read', userid);
-    console.log('read mid', req.body.unreadMid);
     try {
         const result = await messages.readMessage(req.body.unreadMid, userid);
         res.json(result);
@@ -76,7 +75,6 @@ router.put('/inbox/delete', async (req, res) => {
 /**ALL REQUESTS SENT BY USER */
 router.get('/outbox/requests', async (req, res) => {
     const userid = req.user.sub;
-    console.log('endpoint: private/notification/outbox/requests', userid);
     try {
         const results = await messages.getSentRequests(userid);
         res.json(results);
@@ -102,31 +100,29 @@ router.get('/inbox/unread', async (req, res) => {
 /**LIST ALL REQUESTS AND CONVERSATIONS */
 router.get('/inbox', async (req, res) => {
     const userid = req.user.sub;
-    console.log('endpoint: private/notification/inbox', userid);
     var convo = {};
     try {
         /**ALL SENT AND RECEIVED */
         const results = await messages.getAll(userid);
         for (var i = results.length-1; i >= 0; i --) {//most recent first
             /**convert userid -> username */
-            console.log(results[i]);
-            if (results[i].from == userid) {
+            if (results[i].from == userid) {//from = me
                 results[i].from = [results[i].from, 'You'];
                 if (results[i].type == 'request') continue;//dont show for requests sent
             }
-            else {
+            else {//from = other person
                 const from = await users.getUsernameByUserid(results[i].from);
                 results[i].from = [results[i].from, from];
             }
-            if (results[i].to == userid) results[i].to = [results[i].to, 'You'];
-            else {
+            if (results[i].to == userid) results[i].to = [results[i].to, 'You'];//to = me
+            else {//to = other person
                 const to = await users.getUsernameByUserid(results[i].to);
                 results[i].to = [results[i].to, to];
             }   
             /**sort into conversations */
             var unique;
-            if (results[i].from == userid) unique = results[i].to[1];
-            else unique = results[i].from[1];
+            if (results[i].from[0] == userid) unique = results[i].to[1];//message from me
+            else unique = results[i].from[1];//message form other person 
             if (! convo[unique]) {//unique
                 convo[unique] = [results[i]];
             }

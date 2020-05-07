@@ -75,6 +75,11 @@ const useStyles = makeStyles((theme) => ({
   },
   selectedPanelHeader: {
     color: 'primary'
+  },
+  userButton : {
+    color: theme.palette.primary.main,
+    margin: theme.spacing(2),
+    padding: theme.spacing(1)
   }
 }));
 
@@ -100,6 +105,7 @@ export default function ListingResults() {
       const responseData = await response.json();
       setCurrent(responseData.currentResidence);
       setPast(responseData.pastResidence);
+      setMates(responseData.mates)
       console.log(responseData);
     }
     catch(err) {
@@ -159,10 +165,14 @@ export default function ListingResults() {
       <Grid item key={index}>
       <Grid container alignItems="center">
         <Grid item xs={10} >
-          <Typography>{mates[index].username}</Typography>
+          <Button
+          className={classes.userButton}
+           component={Link} 
+           to={`/${mates[index].username}`}
+          >{mates[index].username}</Button>
         </Grid>
         <Grid item xs = {2}>
-          <IconButton color="primary" component={Link} to={`/${mates[index].username}`}> 
+          <IconButton color="primary"> 
             <ArrowForwardIcon/>
           </IconButton>
         </Grid>
@@ -213,10 +223,6 @@ export default function ListingResults() {
 
       </Paper>
     </Paper>
-    </div>
-    {/********************************************************* */}
-    <div className={classes.root}>
-
     </div>
     </div>
   );

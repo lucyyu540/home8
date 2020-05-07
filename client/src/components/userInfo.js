@@ -13,6 +13,7 @@ import '../App.css'
 /** ICONS */
 import Divider from '@material-ui/core/Divider';
 import EditIcon from '@material-ui/icons/Edit';
+import { Typography } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -58,6 +59,7 @@ export default function Profile(props){
     genderPreference: null
   });
   const { getTokenSilently } = useAuth0();
+
   const getProfile = async (username) => {
     try {
       const token = await getTokenSilently();
@@ -67,6 +69,7 @@ export default function Profile(props){
         }, 
         method: 'put', 
       });
+      //responseData.dob.substring(0,responseData.dob.indexOf('T'))
       const responseData = await response.json();
       setShowResult(true);
       setThisUser({
@@ -75,7 +78,7 @@ export default function Profile(props){
         lastName: responseData.lastName,
         gender: responseData.gender,
         nationality: responseData.nationality,
-        dob: responseData.dob.substring(0,responseData.dob.indexOf('T'))
+        dob: responseData.dob
       });
       console.log(responseData)
     } catch (error) {
@@ -89,7 +92,12 @@ export default function Profile(props){
   }, [loading] )
   console.log(thisUser);
   
-
+/**heler function */
+function formatDate(date) {
+  const d = new Date(date);
+  const s = d.toString().split(" ")[1] + " " + d.getDate()+ ", "+ d.getFullYear();
+  return s;
+}
 
   return (
 
@@ -97,6 +105,7 @@ export default function Profile(props){
   
     <div className={classes.root}> 
         <Paper className={classes.paper}>
+          {/**EDIT IF USER */}
           {isAuthenticated && user.nickname === username && (
           <div className={classes.rightAlign}>
             <Button
@@ -113,11 +122,28 @@ export default function Profile(props){
             <div className='name'> @{thisUser.username}</div>
             <ListItem className={classes.list}>
             <Paper variant="outlined" square className={classes.secondPaper}>
-              <List >
-                <ListItem >{thisUser.firstName } {thisUser.lastName }</ListItem>
-                <ListItem >{thisUser.dob}</ListItem>
-                <ListItem >Gender: {thisUser.gender}</ListItem>
-                <ListItem >Nationality: {thisUser.nationality}</ListItem>
+              <List>
+                <ListItem >
+                  <Typography variant="body2" >
+                    {thisUser.firstName } {thisUser.lastName }
+                  </Typography>
+                </ListItem>
+                {thisUser.dob && (
+                <ListItem >
+                  <Typography variant="body2" >
+                  {formatDate(thisUser.dob)}
+                  </Typography>
+                </ListItem>)}
+                {thisUser.gender && (<ListItem >
+                  <Typography variant="body2" >
+                    {thisUser.gender}
+                  </Typography>
+                </ListItem>)}
+                {thisUser.nationality &&(<ListItem>
+                  <Typography variant="body2" color='primary'>
+                    {thisUser.nationality}
+                  </Typography>
+                </ListItem>)}
               </List>
             </Paper>
             </ListItem>

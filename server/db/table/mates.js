@@ -9,7 +9,7 @@ db.addMates = (userid, friendid) => {
         'INSERT INTO mates (userid, friendid) SELECT ?, ? FROM DUAL WHERE NOT EXISTS(SELECT * FROM mates WHERE userid=? AND friendid=? LIMIT 1)'
         , [userid, friendid, userid, friendid, friendid, userid, friendid, userid] , (err, results) => {
             if (err) return rej(err);
-            return (results);
+            return res(results);
         })
     })
 }

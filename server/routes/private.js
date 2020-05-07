@@ -81,7 +81,6 @@ router.put('/listings',  async (req,res) => {
             }
             if (!favorited) sorted.public.push(results[i]);
         }
-        console.log(sorted);
         res.json(sorted).end();
     }
     catch (err) {
@@ -234,31 +233,21 @@ router.put('/update-listing', async (req, res) => {
             for (var i = 0 ; i < originalMates.length; i ++) {map[originalMates[i]] = 1;}
             var deleteMates = [];
             var addedMates = [];
-            var unionMates = [];
             for (var i = 0 ; i < req.body.mates.length; i ++) {
                 if (map[req.body.mates[i][0]]) {
                     delete map[req.body.mates[i][0]];//no change
-                    unionMates.push(req.body.mates[i][0]);
                 }
-                else addedMates.push(req.body.mates[i][0]);//new
+                else addedMates.push(req.body.mates[i][0]);//new = owner
             }
             for (mate in map) {
                 if (mate) deleteMates.push(mate);//remaining --> deleted
             }
             console.log('deleted mates', deleteMates);
-            console.log('added mates', addedMates);
+            console.log('added mates', addedMates);//= owner
             //new mates
             for (var i = 0 ; i < addedMates.length; i ++) {
                 filter.movein(addedMates[i], lid);
-            /**friending each other*/
-                for (var j = 0 ; j < unionMates.length; j ++) {
-                    matesDB.addMates(addedMates[i], unionMates[j]);
-                }
-                for (var j = i+1; j < addedMates.length; j ++) {
-                    matesDB.addedMates(addedMates[i], addedMates[j])
-                }
             }
-
             //deleted mates
             for (var i = 0 ; i < deleteMates.length; i ++) {
                 filter.moveout(deleteMates[i], lid);
@@ -379,12 +368,16 @@ router.get('/get-question', async (req, res) => {
 
 router.put('/compare', async (req,res) => {
     const me = req.user.sub;
+    console.log('endpoint: /private/compare', me);
+    console.log('on this proifle page', req.body);
     try {
-        const you = await users.getUsernameByUserid(req.body.username);
+        const user = await users.getUserByUsername(req.body.username);
+        const you = user.userid;
         const myAs = await personalityAs.getAnswersByUserid(me);
         const yourAs = await personalityAs.getAnswersByUserid(you);
         const similarity = euclideanDistance(myAs, yourAs);
-        res.json(similarity);
+        console.log('similarity score=', similarity);
+        res.json({score: similarity});
     }
     catch(err) {
         res.json(err);
@@ -424,16 +417,17 @@ function arrayToString(arr) {
 function euclideanDistance(A, B) {
     var sum = 0;
     var maxDistance = 0;
-    for (var i = 2 ; i < A.length; i ++) {
-        if (A[i] || B[i]) break;
-        sum += Math.pow(A[i] - B[i], 2);//(a-b)^2
-        maxDistance += 16;
+    //arr = [userid, x, qid1, ...]
+    for (var i = 1 ; i < Math.max(A.x,B.x); i ++) {
+        if (!A['qid'+i] || !B['qid'+i]) sum += 16;
+        else sum += Math.pow(A['qid'+i] - B['qid'+i], 2);//(a-b)^2
+        maxDistance += 16;//(5-1)^2
     }
-    var distance = Math.sqrt(sq);
+    var distance = Math.sqrt(sum);
     maxDistance = Math.sqrt(maxDistance);
     if (maxDistance == 0) return 0;
-    const percentage = (distance/maxDistance);
-    return (1-percentage)*100;
+    const frac = (distance/maxDistance);//closer to zero the more similar
+    return (1-frac)*100;
 }
 
 module.exports = router;

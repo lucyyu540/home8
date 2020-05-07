@@ -147,7 +147,7 @@ export default function ListingResults() {
     var unreadMid = [];
     for (var i = 0 ; i < convo[sel].length; i ++) {
       if (convo[sel][i].read == 0 && convo[sel][i].to[0] == user.sub) unreadMid.push(convo[sel][i].mid);
-      else break;
+      else break;//alr read or sent by me
     }
     if (unreadMid.length==0) return;
     try {
@@ -430,8 +430,7 @@ export default function ListingResults() {
             <Grid container alignItems='center' spacing={2} className={classes.listItem}>
               <Grid item xs={2}> {/**TITLE = THE OTHER PERSON */}
               {/**last message from other person and is unread */}
-              {/** convo[keyName][0].from[1] != 'You' && convo[keyName][0].read == 0 */}
-                {convo[keyName][0].read == 0 && (
+                {convo[keyName][0].from[1] !='You' && convo[keyName][0].read==0 && (
                   <Badge color="primary" variant="dot">
                     <Typography variant="h6" color='textPrimary'>
                       {keyName}
@@ -439,8 +438,7 @@ export default function ListingResults() {
                 </Badge>
                 )}
                 {/**last message from you/ from other person and is read */}
-                {/** (convo[keyName][0].from[1] == 'You' || convo[keyName][0].read == 1)*/}
-                {(convo[keyName][0].read == 1) && (
+                {(convo[keyName][0].from[1]=='You' || convo[keyName][0].read==1) && (
                   <Typography variant="h6" color='textPrimary'>
                     {keyName}
                   </Typography>
