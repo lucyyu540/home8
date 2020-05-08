@@ -242,6 +242,8 @@ export default function ListingResults() {
     getInbox();
     /**ENTERED A CHATROOM */
     if (sel!= null) {
+      /**mark unread messages as read */
+      markRead();
       if (scroll) {
         /**height */
         var temp = window.innerHeight - messageHeight.current.clientHeight-80;//appbar=66
@@ -252,8 +254,6 @@ export default function ListingResults() {
         if (scroll == 1) setScroll(scroll+1);
         else setScroll(0);
       }
-      /**mark unread messages as read */
-      markRead();
     }
   },[convo])
 

@@ -112,7 +112,7 @@ function formatDate(date) {
             color="primary"
             startIcon={<EditIcon/>}
             className={classes.button}
-            component={Link} to={`/${user.nickname}/edit`}
+            component={Link} to={`/user/${user.nickname}/edit`}
             >
               Edit
             </Button>

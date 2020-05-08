@@ -32,11 +32,10 @@ function App() {
           <Route exact path='/' component = {LandingPage}/>
           <Route exact path='/listing/:lid' component={Listing} />
           <PrivateRoute path="/inbox" component={Inbox} />
-          <PrivateRoute exact path="/:username/edit" component={EditProfile} />
+          <PrivateRoute exact path="/user/:username/edit" component={EditProfile} />
           <PrivateRoute path="/my-listings/:lid" component={MyListings} />
-          <PrivateRoute path="/inbox" component={Inbox} />
           <PrivateRoute path = "/my-homes" component={MyHomes} />
-          <Route exact path="/:username" component={Profile} />
+          <Route exact path="/user/:username" component={Profile} />
         </Switch>
       </Router>
       

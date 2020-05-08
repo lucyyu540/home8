@@ -13,6 +13,15 @@ db.addMates = (userid, friendid) => {
         })
     })
 }
+/**EDIT */
+db.addReview = (userid, friendid, review) => {
+    return new Promise ((res, rej) => {
+        sql.query('UPDATE mates set review=? WHERE userid=? AND friendid=?', [review, userid, friendid] , (err, results) => {
+            if (err) return rej(err);
+            return res(results);
+        })
+    })
+}
 
 /**GET */
 db.getMates = (userid) => {

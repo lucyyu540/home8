@@ -134,7 +134,7 @@ export default function NavBar() {
             <ListItemIcon><HomeIcon /></ListItemIcon>
             <ListItemText primary={'Home'} />
           </ListItem>
-          <ListItem button component={Link} to={`/${user.nickname}`} key={'Profile'}>
+          <ListItem button component={Link} to={`/user/${user.nickname}`} key={'Profile'}>
             <ListItemIcon><AccountCircle /></ListItemIcon>
             <ListItemText primary={'Profile'} />
           </ListItem>

@@ -218,7 +218,7 @@ console.log(sentReq);
         <Typography variant="body2"color='textSecondary' className={classes.bottomPadding}>
             owner: 
             {listing.owner && (
-            <Typography variant="body2"color='textSecondary' component={Link} to={`/${listing.owner[1]}`}>
+            <Typography variant="body2"color='textSecondary' component={Link} to={`/user/${listing.owner[1]}`}>
             {' '} {listing.owner[1]}
             </Typography>)}
         </Typography>
@@ -249,7 +249,7 @@ console.log(sentReq);
       {/**MATES */}
       {listing.mates && (<ListItem>
         {listing.mates.map( (key,index) => ( 
-          <Button color='primary' component={Link} to={`/${listing.mates[index][1]}`} key={'Profile'}>{listing.mates[index][1]}</Button>
+          <Button color='primary' component={Link} to={`/user/${listing.mates[index][1]}`} key={'Profile'}>{listing.mates[index][1]}</Button>
         ))
         }
       </ListItem>)}

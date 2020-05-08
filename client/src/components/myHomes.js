@@ -19,6 +19,12 @@ import SnackbarContent from '@material-ui/core/SnackbarContent';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+/**DIALOG */
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 /**ICONS */
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Avatar from '@material-ui/core/Avatar';
@@ -51,8 +57,8 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: 76,//app-bar heigh is 66ish
     overflow:'auto',
   },
-  listItem : {
-    margin: theme.spacing(1),
+  row : {
+    margin: theme.spacing(1,0),
   },
   bubble: {//paper bubble 
     padding: theme.spacing(1),
@@ -76,10 +82,11 @@ const useStyles = makeStyles((theme) => ({
   selectedPanelHeader: {
     color: 'primary'
   },
-  userButton : {
-    color: theme.palette.primary.main,
+  button : {
+    color: theme.palette.text.primary,
     margin: theme.spacing(2),
-    padding: theme.spacing(1)
+    padding: theme.spacing(1,3),
+    textDecoration: 'none'
   }
 }));
 
@@ -89,8 +96,20 @@ export default function ListingResults() {
   const [current, setCurrent] = React.useState(null);
   const [past, setPast] = React.useState(null);
   const [mates, setMates] = React.useState(null);
+  const [dialog, setDialog] = React.useState(false);
+  const [mate, setMate] = React.useState(null);
   /**HANDLE FUNCTIONS **************************************************** */
-
+  function handleDialogClose() {
+    setDialog(false);
+    setMate(null);
+  }
+  function handleDialogOpen(mate) {
+    setDialog(true);
+    setMate(mate);
+  }
+  function handleReviewChange(e) {
+    setMate({...mate, review: e.target.value})
+  }
   /**API CALLS********************************************************** */
   async function loadAll(req) {
     try {
@@ -112,12 +131,14 @@ export default function ListingResults() {
       console.log(err);
     }
   }
-  async function getMates(req) {
+  async function submitReview() {
     try {
       const token = await getTokenSilently();
       const data = {
+        friendid: mate.id,
+        review: mate.review
       }
-      await fetch(`https://localhost:3000/private/residence/mates`, {
+      await fetch(`https://localhost:3000/private/residence/submit-review`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -143,10 +164,15 @@ export default function ListingResults() {
     <Grid container direction="column">
     <Divider/>
     {homes.map((key, index) => (
-      <Grid item key={index}>
+      <Grid item key={index} className={classes.row}>
       <Grid container alignItems="center">
         <Grid item xs={10} >
-                <Typography>{homes[index].address}</Typography>
+          <Typography
+          variant='button'
+          className={classes.button}
+           component={Link} 
+           to={`/listing/${homes[index].lid}`}
+          >{homes[index].address}</Typography>
         </Grid>
         <Grid item xs = {2}>
           <IconButton color="primary" component={Link} to={`/listing/${homes[index].lid}`}> 
@@ -162,24 +188,78 @@ export default function ListingResults() {
     <Grid container direction="column">
     <Divider/>
     {mates.map((key, index) => (
-      <Grid item key={index}>
+      <Grid item key={index} className={classes.row}>
       <Grid container alignItems="center">
-        <Grid item xs={10} >
-          <Button
-          className={classes.userButton}
+        <Grid item xs >
+          <Typography
+          variant='button'
+          className={classes.button}
            component={Link} 
-           to={`/${mates[index].username}`}
-          >{mates[index].username}</Button>
+           to={`/user/${mates[index].username}`}
+          >{mates[index].username}</Typography>
+        </Grid>
+        <Grid item xs={1} >
+          <Typography
+          variant='button'
+          color='secondary'
+          >match: {mates[index].score}</Typography>
         </Grid>
         <Grid item xs = {2}>
+          {mates[index].review && (
           <IconButton color="primary"> 
             <ArrowForwardIcon/>
           </IconButton>
+          )}
+          {!mates[index].review && (
+           <Fab variant="extended"
+           color='primary'
+           onClick={() => handleDialogOpen(mates[index])}>
+             Add review
+           </Fab>
+          )}
         </Grid>
       </Grid>
       </Grid>
         ))}
     </Grid>
+  )
+  const displayEditReview = (mate) => (
+    <Dialog
+    open={dialog}
+    onClose={handleDialogClose}
+    scroll='paper'
+    maxWidth='sm'
+    fullWidth
+  >
+    <DialogTitle>
+      {mate.username}
+    </DialogTitle>
+    <DialogContent>
+      <Typography color='secondary' variant='body2'>
+        Match score: {mate.score}
+      </Typography>
+    </DialogContent>
+    <DialogContent dividers>
+      <TextField
+        className={classes.textField}
+        multiline
+        rows={10}
+        value={mate.review}
+        onChange={handleReviewChange}
+        variant='outlined'
+        />
+      
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={submitReview}>
+        Submit
+      </Button>
+      <Button onClick={handleDialogClose} color="primary">
+        Close
+      </Button>
+    </DialogActions>
+  </Dialog>
+
   )
   /******************************************************************************* */
   /******************************************************************************* */
@@ -223,6 +303,9 @@ export default function ListingResults() {
 
       </Paper>
     </Paper>
+    {dialog &&(
+      displayEditReview(mate)
+    )}
     </div>
     </div>
   );

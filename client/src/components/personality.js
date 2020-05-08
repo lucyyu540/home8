@@ -21,7 +21,7 @@ import Typography from '@material-ui/core/Typography';
 
 /**STYLES */
 import '../App.css'
-import { ListItemText } from '@material-ui/core';
+import { ListItemText, Divider } from '@material-ui/core';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import { red } from '@material-ui/core/colors';
 const useStyles = makeStyles((theme) => ({
@@ -310,14 +310,23 @@ export default function Personality(props) {
         <Grid container direction='column' alignItems='center'>
           <Grid item>
           <Paper className={classes.secondPaper}>
-            <Grid container justify='center'>
+            <Grid container direction='column' alignItems='center' justify='center'>
               <Grid item>
-                <div style={{fontFamily:'digit', fontSize:'6vh'}}>
-                match: {match[0].value.toFixed(2)}%
-                </div>
+                <Typography style={{fontFamily:'digit', fontSize:'3vh'}} color='secondary'>
+                match score
+                </Typography>
+              </Grid>
+              <Grid item>
+                <Typography style={{fontFamily:'digit', fontSize:'8vh'}}>
+                {match[0].value.toFixed(2)}%
+                </Typography>
               </Grid>
             </Grid>
           </Paper>
+          <Divider style={{margin:'theme.spacing(3,0)'}}/>
+          </Grid>
+          <Grid item>
+
           </Grid>
        
         </Grid>

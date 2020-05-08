@@ -6,6 +6,7 @@ const filter = require('../db/table/filter');
 const matesDB = require('../db/table/mates');
 const users = require('../db/table/users');
 const messages = require('../db/table/messages')
+const personalityAs = require('../db/table/personalityAs');
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 router.get('/history', async (req, res) => {
     const userid = req.user.sub;
@@ -22,9 +23,17 @@ router.get('/history', async (req, res) => {
             const temp = await listings.getListingByLid(pastResidence[i].lid);
             pastResidence[i] = temp;
         }
+        const myAs = await personalityAs.getAnswersByUserid(userid);
         for (var i = 0 ; i < mates.length; i ++) {
             const temp = await users.getUsernameByUserid(mates[i].friendid);
-            mates[i] = {id: mates[i].friendid, username: temp};
+            const yourAs = await personalityAs.getAnswersByUserid(mates[i].friendid);
+            const score = euclideanDistance(myAs, yourAs);
+            mates[i] = {
+                id: mates[i].friendid, 
+                username: temp, 
+                review: mates[i].review,
+                score: score
+            };
         }
         const result = {
             currentResidence : currentResidence,
@@ -39,6 +48,18 @@ router.get('/history', async (req, res) => {
         res.json(err);
     } 
 });
+router.put('/submit-review', async (req, res) => {
+    const userid = req.user.sub;
+    console.log('endpoint: /private/residence/submit-review', userid);
+    const friendid = req.body.friendid;
+    const review = req.body.review;
+    try {
+        await matesDB.addReview(userid,friendid,review);
+    }
+    catch (err) {
+        console.log(err);
+    }
+})
 
 router.put('/move-out', async (req, res) => {
     const userid = req.user.sub;
@@ -82,5 +103,20 @@ function arrayToString(arr) {
         else s += " " + arr[i];
     }
     return s;
+}
+function euclideanDistance(A, B) {
+    var sum = 0;
+    var maxDistance = 0;
+    //arr = [userid, x, qid1, ...]
+    for (var i = 1 ; i < Math.max(A.x,B.x); i ++) {
+        if (!A['qid'+i] || !B['qid'+i]) sum += 16;
+        else sum += Math.pow(A['qid'+i] - B['qid'+i], 2);//(a-b)^2
+        maxDistance += 16;//(5-1)^2
+    }
+    var distance = Math.sqrt(sum);
+    maxDistance = Math.sqrt(maxDistance);
+    if (maxDistance == 0) return 0;
+    const frac = (distance/maxDistance);//closer to zero the more similar
+    return (1-frac)*100;
 }
 module.exports = router;

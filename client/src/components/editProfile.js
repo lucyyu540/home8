@@ -316,7 +316,7 @@ const { getTokenSilently, user, loading} = useAuth0();
             className={classes.button}
             startIcon={<SaveIcon/>}
             size="small"
-            component={Link} to={`/${user.nickname}/edit`}
+            component={Link} to={`/user/${user.nickname}/edit`}
             onClick={updateProfile}
             >Save
             </Button>

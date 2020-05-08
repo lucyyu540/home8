@@ -8,7 +8,6 @@ import Personality from './personality'
 import '../App.css'
 export default function Profile() {
     const username = useParams().username;
-    console.log(username);
     return( 
         <Grid container 
         direction="column"

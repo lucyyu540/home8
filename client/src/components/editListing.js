@@ -640,7 +640,7 @@ export default function Listing(props) {
         )}
         {mates.map( (key,index) => ( 
           <Box key={index} borderColor='text.secondary' border={1} borderRadius="borderRadius" className={classes.box}>
-          <Button color='primary' component={Link} to={`/${mates[index][1]}`} key={'Profile'}>{mates[index][1]}</Button>
+          <Button color='primary' component={Link} to={`/user/${mates[index][1]}`} key={'Profile'}>{mates[index][1]}</Button>
           <IconButton onClick={() => deleteMate(index)}><HighlightOffIcon color='primary'/></IconButton>
           </Box>
         ))
