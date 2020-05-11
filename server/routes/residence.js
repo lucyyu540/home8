@@ -28,12 +28,13 @@ router.get('/history', async (req, res) => {
             const temp = await users.getUsernameByUserid(mates[i].friendid);
             const yourAs = await personalityAs.getAnswersByUserid(mates[i].friendid);
             const score = euclideanDistance(myAs, yourAs);
+            
             mates[i] = {
-                id: mates[i].friendid, 
-                username: temp, 
-                review: mates[i].review,
-                score: score
-            };
+                id : mates[i].friendid,
+                username : temp,
+                score : score.toFixed(2),
+                review : mates[i].review
+            }
         }
         const result = {
             currentResidence : currentResidence,
@@ -53,8 +54,11 @@ router.put('/submit-review', async (req, res) => {
     console.log('endpoint: /private/residence/submit-review', userid);
     const friendid = req.body.friendid;
     const review = req.body.review;
+    console.log(friendid);
+    console.log(review);
     try {
         await matesDB.addReview(userid,friendid,review);
+        console.log('review added')
     }
     catch (err) {
         console.log(err);

@@ -18,6 +18,7 @@ db.addReview = (userid, friendid, review) => {
     return new Promise ((res, rej) => {
         sql.query('UPDATE mates set review=? WHERE userid=? AND friendid=?', [review, userid, friendid] , (err, results) => {
             if (err) return rej(err);
+            console.log(results);
             return res(results);
         })
     })
@@ -26,7 +27,15 @@ db.addReview = (userid, friendid, review) => {
 /**GET */
 db.getMates = (userid) => {
     return new Promise ((res, rej) => {
-        sql.query('SELECT friendid FROM mates WHERE userid=?', [userid] , (err, results) => {
+        sql.query('SELECT * FROM mates WHERE userid=?', [userid] , (err, results) => {
+            if (err) return rej(err);
+            return res(results);
+        })
+    })
+}
+db.getReviews = (userid) => {
+    return new Promise ((res, rej) => {
+        sql.query('SELECT review FROM mates WHERE friendid=?', [userid] , (err, results) => {
             if (err) return rej(err);
             return res(results);
         })

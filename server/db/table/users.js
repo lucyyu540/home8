@@ -43,7 +43,7 @@ db.getUserByUsername = (username) => {
 
 db.getProtectedUserByUsername = (username) => {
     return new Promise((res, rej) => {
-        sql.query('SELECT username, firstName, lastName, gender, nationality, dob FROM users WHERE username = ?',[username], (err, results) => {
+        sql.query('SELECT userid, username, firstName, lastName, gender, nationality, dob FROM users WHERE username = ?',[username], (err, results) => {
             if (err) return rej(err);
             return res(results[0]);//exists
         });

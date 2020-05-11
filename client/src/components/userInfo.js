@@ -78,7 +78,8 @@ export default function Profile(props){
         lastName: responseData.lastName,
         gender: responseData.gender,
         nationality: responseData.nationality,
-        dob: responseData.dob
+        dob: responseData.dob,
+        reviews: responseData.reviews
       });
       console.log(responseData)
     } catch (error) {
@@ -151,8 +152,14 @@ function formatDate(date) {
         </Paper>
 
         <Paper className={classes.paper}>
-          <List  className={classes.list}>
-            <ListItem>Load Review</ListItem>
+          <List className={classes.list}>
+            {thisUser.reviews && (thisUser.reviews.map((key, index) => (
+              <ListItem key={index}>
+                {thisUser.reviews[index].review}
+              </ListItem>
+            )
+            ))}
+            
           </List>
         </Paper>
     </div>

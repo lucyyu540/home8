@@ -198,17 +198,12 @@ export default function ListingResults() {
            to={`/user/${mates[index].username}`}
           >{mates[index].username}</Typography>
         </Grid>
-        <Grid item xs={1} >
-          <Typography
-          variant='button'
-          color='secondary'
-          >match: {mates[index].score}</Typography>
-        </Grid>
         <Grid item xs = {2}>
           {mates[index].review && (
-          <IconButton color="primary"> 
-            <ArrowForwardIcon/>
-          </IconButton>
+          <Fab variant="extended"
+          onClick={() => handleDialogOpen(mates[index])}>
+            edit review
+          </Fab>
           )}
           {!mates[index].review && (
            <Fab variant="extended"
@@ -232,13 +227,24 @@ export default function ListingResults() {
     fullWidth
   >
     <DialogTitle>
-      {mate.username}
+      <Grid container alignItems='center'>
+        <Grid item xs>
+          <Typography style={{fontFamily:'Autography', fontSize:'8vh'}}>
+          @{mate.username}
+          </Typography>
+        </Grid>
+        <Grid item xs>
+          <Grid container direction='column' alignItems='flex-end'>
+            <Grid item>
+            <Typography color='secondary' style={{fontFamily:'digit', fontSize:'4vh'}}>
+            {mate.score}%
+            </Typography>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
     </DialogTitle>
-    <DialogContent>
-      <Typography color='secondary' variant='body2'>
-        Match score: {mate.score}
-      </Typography>
-    </DialogContent>
+
     <DialogContent dividers>
       <TextField
         className={classes.textField}
@@ -251,12 +257,23 @@ export default function ListingResults() {
       
     </DialogContent>
     <DialogActions>
-      <Button onClick={submitReview}>
-        Submit
-      </Button>
-      <Button onClick={handleDialogClose} color="primary">
-        Close
-      </Button>
+      <Grid container>
+        <Grid item xs>
+          <Button onClick={submitReview} color='primary'>
+          Submit
+          </Button>
+        </Grid>
+        <Grid item xs>
+          <Grid container direction='column' alignItems='flex-end'>
+          <Button onClick={handleDialogClose}>
+            cancel
+          </Button>
+          </Grid>
+        </Grid>
+
+      </Grid>
+      
+      
     </DialogActions>
   </Dialog>
 

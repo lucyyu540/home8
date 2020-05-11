@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const users = require('../db/table/users');
 const listings = require('../db/table/listings');
+const matesDB = require('../db/table/mates')
 
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /**PUBLIC LISTTINGS BASED ON COORDINATES */
@@ -64,6 +65,8 @@ router.put('/:username', async (req, res) => {
     //search in users
     try {
         const results = await users.getProtectedUserByUsername(req.params.username);
+        const reviews = await matesDB.getReviews(results.userid);
+        results.reviews = reviews;
         console.log(results);
         res.json(results).end();
     }

@@ -306,6 +306,8 @@ router.put('/my-profile', async (req, res) => {
     //search in users
     try {
         const results = await users.getUserByUserid(userid);
+        const reviews = await matesDB.getReviews(userid);
+        results.reviews = reviews;
         console.log(results);
         res.json(results).end();
     }
