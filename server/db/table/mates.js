@@ -35,7 +35,7 @@ db.getMates = (userid) => {
 }
 db.getReviews = (userid) => {
     return new Promise ((res, rej) => {
-        sql.query('SELECT review FROM mates WHERE friendid=?', [userid] , (err, results) => {
+        sql.query('SELECT review, userid FROM mates WHERE friendid=?', [userid] , (err, results) => {
             if (err) return rej(err);
             return res(results);
         })

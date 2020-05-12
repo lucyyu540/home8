@@ -5,8 +5,16 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Link, useParams } from "react-router-dom";
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import Grid from '@material-ui/core/Grid';
 import ListItemText from '@material-ui/core/ListItemText';
 import Button from '@material-ui/core/Button';
+
+/**DIALOG */
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
+
 /** STTYLE */
 import '../App.css'
 
@@ -14,6 +22,8 @@ import '../App.css'
 import Divider from '@material-ui/core/Divider';
 import EditIcon from '@material-ui/icons/Edit';
 import { Typography } from "@material-ui/core";
+import Avatar from '@material-ui/core/Avatar';
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -21,6 +31,7 @@ const useStyles = makeStyles((theme) => ({
     },
     paper: {
       width: 350,
+      maxHeight: 500,
       margin: `${theme.spacing(4)}px`,
       padding: theme.spacing(2),
       overflow: 'auto',
@@ -38,6 +49,9 @@ const useStyles = makeStyles((theme) => ({
     rightAlign: {
       textAlign:'right'
     },
+    review: {
+      margin: theme.spacing(2),
+    }
 
   }));
   
@@ -59,6 +73,16 @@ export default function Profile(props){
     genderPreference: null
   });
   const { getTokenSilently } = useAuth0();
+  const [dialog, setDialog] = React.useState(false);
+  const [review, setReview] = React.useState(null);
+  function handleDialogClose() {
+    setDialog(false);
+    setReview(null);
+  }
+  function handleDialogOpen(review) {
+    setDialog(true);
+    setReview(review);
+  }
 
   const getProfile = async (username) => {
     try {
@@ -93,14 +117,60 @@ export default function Profile(props){
   }, [loading] )
   console.log(thisUser);
   
-/**heler function */
+/**helper function */
 function formatDate(date) {
   const d = new Date(date);
   const s = d.toString().split(" ")[1] + " " + d.getDate()+ ", "+ d.getFullYear();
   return s;
 }
+function formatPreview(text) {
+  if (!text) return;
+  if (text.length> 100) {
+    return text.substring(0,100)+ "..."
+  }
+  else return text;
+}
+/**display functions */
+const displayScore = (score) => (
+  <div>
+  {parseFloat(score) < 40 && (
+    <Typography style={{fontFamily:'digit', fontSize:'25px', color:'red'}}>
+    {score}%
+    </Typography>)}
+    {parseFloat(score) >= 40
+    && parseFloat(score) < 80 &&(
+    <Typography style={{fontFamily:'digit', fontSize:'25px', color:'orange'}}>
+    {score}%
+    </Typography>)}
+    {parseFloat(score) >= 80 &&(
+    <Typography color='secondary' style={{fontFamily:'digit', fontSize:'25px'}}>
+    {score}%
+    </Typography>)}
+  </div>
+)
+const displayReviewDetails = (review) => (
+  <Dialog
+  open={dialog}
+  onClose={handleDialogClose}
+  scroll='paper'
+  maxWidth='sm'
+  fullWidth
+>
+  <DialogTitle>
+    {displayScore(review.score)}
+  </DialogTitle>
 
-  return (
+  <DialogContent dividers>
+    {review.review}
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleDialogClose}>
+    Close
+    </Button>
+  </DialogActions>
+</Dialog>
+)
+return (
 
 
   
@@ -120,7 +190,7 @@ function formatDate(date) {
           </div>  
           )}
           <List className={classes.list}>
-            <div className='name'> @{thisUser.username}</div>
+            <Typography style={{fontFamily:'England', fontSize:'100px'}}> @{thisUser.username}</Typography>
             <ListItem className={classes.list}>
             <Paper variant="outlined" square className={classes.secondPaper}>
               <List>
@@ -152,16 +222,40 @@ function formatDate(date) {
         </Paper>
 
         <Paper className={classes.paper}>
-          <List className={classes.list}>
+          <Grid container justify='center'>
+            <Grid item>
+              <Typography style={{fontFamily:'Autography', fontSize:'50px'}}>
+                Reviews
+              </Typography>
+            </Grid>
+          </Grid>
+          <Divider />
+          <List>
             {thisUser.reviews && (thisUser.reviews.map((key, index) => (
-              <ListItem key={index}>
-                {thisUser.reviews[index].review}
+              thisUser.reviews[index].review && (
+              <ListItem  
+              button 
+              key={index}
+              onClick={() => handleDialogOpen(thisUser.reviews[index])}
+              >
+                <Grid container alignItems='center'>
+                  {/**SCORE */}
+                  <Grid item xs={2}>
+                    <Avatar alt="Profile Picture"/>
+                  </Grid>
+                  {/**REVIEW PREVIEW */}
+                  <Grid item xs>
+                    <Typography variant='body2'>
+                      {formatPreview(thisUser.reviews[index].review)}
+                    </Typography>
+                  </Grid>
+                </Grid>         
               </ListItem>
-            )
-            ))}
-            
+              )
+            )))}
           </List>
         </Paper>
+        {dialog && displayReviewDetails(review)}
     </div>
       
   );
