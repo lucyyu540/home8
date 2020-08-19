@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
     },
     paper: {
       width: 350,
-      maxHeight: 500,
+      maxHeight: 350,
       margin: `${theme.spacing(4)}px`,
       padding: theme.spacing(2),
       overflow: 'auto',
@@ -42,7 +42,6 @@ const useStyles = makeStyles((theme) => ({
       width: 250
     },
     list: {
-        alignItems:'center',
         textAlign:'center',
         justifyContent: 'center',
     },
@@ -119,6 +118,7 @@ export default function Profile(props){
   
 /**helper function */
 function formatDate(date) {
+  if (!date) return null;
   const d = new Date(date);
   const s = d.toString().split(" ")[1] + " " + d.getDate()+ ", "+ d.getFullYear();
   return s;
@@ -132,7 +132,8 @@ function formatPreview(text) {
 }
 /**display functions */
 const displayScore = (score) => (
-  <div>
+  <Grid container>
+    <Grid item>
   {parseFloat(score) < 40 && (
     <Typography style={{fontFamily:'digit', fontSize:'25px', color:'red'}}>
     {score}%
@@ -146,7 +147,14 @@ const displayScore = (score) => (
     <Typography color='secondary' style={{fontFamily:'digit', fontSize:'25px'}}>
     {score}%
     </Typography>)}
-  </div>
+    </Grid>
+    <Grid item>
+      <Typography variant='caption'>
+        (Their personality compatability score)
+      </Typography>
+    </Grid>
+
+  </Grid>
 )
 const displayReviewDetails = (review) => (
   <Dialog
@@ -170,10 +178,9 @@ const displayReviewDetails = (review) => (
   </DialogActions>
 </Dialog>
 )
+
+/******************************************************************************** */
 return (
-
-
-  
     <div className={classes.root}> 
         <Paper className={classes.paper}>
           {/**EDIT IF USER */}
@@ -192,35 +199,34 @@ return (
           <List className={classes.list}>
             <Typography style={{fontFamily:'England', fontSize:'100px'}}> @{thisUser.username}</Typography>
             <ListItem className={classes.list}>
-            <Paper variant="outlined" square className={classes.secondPaper}>
-              <List>
-                <ListItem >
-                  <Typography variant="body2" >
+            <Paper variant='outlined' square className={classes.secondPaper}>
+              <Grid container direction='column'>
+                <Grid item >
+                  <Typography variant='body2' >
                     {thisUser.firstName } {thisUser.lastName }
                   </Typography>
-                </ListItem>
-                {thisUser.dob && (
-                <ListItem >
+                </Grid>
+                <Grid item >
                   <Typography variant="body2" >
                   {formatDate(thisUser.dob)}
                   </Typography>
-                </ListItem>)}
-                {thisUser.gender && (<ListItem >
+                </Grid>
+                <Grid item >
                   <Typography variant="body2" >
                     {thisUser.gender}
                   </Typography>
-                </ListItem>)}
-                {thisUser.nationality &&(<ListItem>
+                </Grid>
+                <Grid item>
                   <Typography variant="body2" color='primary'>
                     {thisUser.nationality}
                   </Typography>
-                </ListItem>)}
-              </List>
+                </Grid>
+              </Grid>
             </Paper>
             </ListItem>
           </List>
         </Paper>
-
+          {/**REVIEWS */}
         <Paper className={classes.paper}>
           <Grid container justify='center'>
             <Grid item>
@@ -241,7 +247,7 @@ return (
                 <Grid container alignItems='center'>
                   {/**SCORE */}
                   <Grid item xs={2}>
-                    <Avatar alt="Profile Picture"/>
+                    <Avatar alt="Profile Picture" component={Link} to={`/user/${thisUser.reviews[index].username}`}/>
                   </Grid>
                   {/**REVIEW PREVIEW */}
                   <Grid item xs>

@@ -63,8 +63,9 @@ export default function ListingResults(props) {
   const { getTokenSilently, user,isAuthenticated, loginWithRedirect } = useAuth0();
   const [listings, setListings] = React.useState([]);
   const [favoriteListings, setFavoriteListings] = React.useState([]);
-  const [req, setReq] = React.useState(null);
+  const [req, setReq] = React.useState([]);
   const [room, setRoom] = React.useState({});
+  console.log(listings);
   useEffect(()=> {
     if (props.listings) setListings(props.listings);
     if (props.favoriteListings) setFavoriteListings(props.favoriteListings);

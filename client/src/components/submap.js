@@ -72,12 +72,12 @@ class Map extends Component {
   }
   componentDidUpdate(nextProps, prevState) {
     this.map.getLayers().forEach(layer => {
-      if (layer.get('title') == 'markers') {
+      if (layer.get('title') === 'markers') {
         const source = layer.getSource();
         const feature = source.getFeatures()[0].setGeometry(new OlGeometryPoint(this.props.coordinates));
       }
     });
-    if (this.props.coordinates != nextProps.coordinates) {
+    if (this.props.coordinates !== nextProps.coordinates) {
       const center = this.props.coordinates
       this.setState({ center: center, zoom: 14 });
     }

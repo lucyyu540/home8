@@ -123,7 +123,9 @@ export default function NavBar() {
       <List>
           <ListItem 
           button key={'Log in/Register'}
-          onClick={() => loginWithRedirect({})}>
+          onClick={() => loginWithRedirect({
+              appState: {targetUrl: window.location.pathname}
+          })}>
             <ListItemIcon><ExitToAppIcon /></ListItemIcon>
             <ListItemText primary={'Log in/Register'} />
           </ListItem>
@@ -231,7 +233,9 @@ export default function NavBar() {
             open={open}
             onClose={handleClose}
             >
-              <MenuItem onClick={() => loginWithRedirect({})}>Log in</MenuItem>
+              <MenuItem onClick={() => loginWithRedirect({
+              appState: {targetUrl: window.location.pathname}
+          })}>Log in</MenuItem>
             </Menu>
           )}
         </AppBar>

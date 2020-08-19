@@ -41,14 +41,14 @@ router.put('/listings',  async (req,res) => {
                 results[i].roomType = roomTypeArr;
                 results[i].rooming = roomingArr;
                 results[i].fromDate = fromDateArr;
-                results[i].toDateArr = toDateArr;
+                results[i].toDate = toDateArr;
             }
             else {
                 results[i].price = [];
                 results[i].roomType = [];
                 results[i].rooming = [];
                 results[i].fromDate = [];
-                results[i].toDateArr = [];
+                results[i].toDate = [];
             }
         }
         console.log(results);
@@ -70,7 +70,9 @@ router.put('/:username', async (req, res) => {
         const thisAs = await personalityAs.getAnswersByUserid(results.userid);
         for (var i = 0; i< reviews.length; i++) {
             const userAs = await personalityAs.getAnswersByUserid(reviews[i].userid);
+            const username = await users.getUsernameByUserid(reviews[i].userid);
             reviews[i].score = (euclideanDistance(thisAs, userAs)).toFixed(2);
+            reviews[i].username = username;
         }
         results.reviews = reviews;
         console.log(results);
@@ -111,7 +113,7 @@ router.get('/listing/:lid', async (req, res) => {
             result.roomType = [];
             result.rooming = [];
             result.fromDate = [];
-            result.toDateArr = [];
+            result.toDate = [];
         }
         /**HIDE ADDRESS */
         result.address = null;
