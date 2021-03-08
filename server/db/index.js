@@ -1,11 +1,21 @@
 /**DEPENDENCIES */
 const mysql = require('mysql');
-require('dotenv').config({path:__dirname+'/./../.env'});//config username and password hiding
-
+require('dotenv').config({path:__dirname+'/./../.env'});
+var conn = mysql.createConnection( {
+    host: 'localhost',
+    user: process.env.DB_USER,
+    password: process.env.DB_PW,
+    database: process.env.DB
+})
+conn.connect((err) => {
+    if (err) throw err;
+    console.log('Connected to local mysql!');
+  });
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 //make calls to pool (e.g. make queries) and
 //always create a connection and manage a list of connections
+/*
 const pool = mysql.createPool({
     //no. of connections will node mysql will hold open to db
     connectionLimit: 10,
@@ -17,6 +27,7 @@ const pool = mysql.createPool({
     multipleStatements: true
 });
 
+
 //check if database is connected
 pool.getConnection( (err) => {
     if (err) {
@@ -27,7 +38,7 @@ pool.getConnection( (err) => {
 });
 
 module.exports = pool;
-
+*/
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /** QUERIES */
 /**USERS */
@@ -46,4 +57,5 @@ db.getUserByEmail = (email) => {
 //cus the way msql works, it does a callback after you make a query
 //so return a promise anytime anytime we make a call to the db
 //then whenever we use db connection, treat it like a promis rather than a callback which makes it easier for async
-module.exports = db;*/
+*/
+module.exports = conn;
