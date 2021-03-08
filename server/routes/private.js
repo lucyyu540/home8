@@ -378,7 +378,7 @@ router.put('/compare', async (req,res) => {
         const data = await personalityAs.getAnswersOfTwoUsers(me, you);
         const similarity = euclideanDistance(data);
         console.log('similarity score=', similarity);
-        res.json({score: similarity});
+        res.json({score: similarity, comparison: data});
     }
     catch(err) {
         res.json(err);
@@ -418,9 +418,8 @@ function arrayToString(arr) {
 function euclideanDistance(arr) {
     var sum = 0;
     var maxDistance = 0;
-    //arr = [userid, x, qid1, ...]
     for (var i = 1 ; i < arr.length; i ++) {
-        sum += Math.pow(arr[i].me - arr[i].you, 2);//(a-b)^2
+        sum += Math.pow(arr[i].diff, 2);//(a-b)^2
         maxDistance += 16;//(5-1)^2
     }
     var distance = Math.sqrt(sum);

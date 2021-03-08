@@ -13,7 +13,7 @@ db.addMates = (userid, friendid) => {
         })
     })
 }
-/**EDIT */
+/**UPDATE */
 db.addReview = (userid, friendid, review) => {
     return new Promise ((res, rej) => {
         sql.query('UPDATE mates set review=? WHERE userid=? AND friendid=?', [review, userid, friendid] , (err, results) => {
@@ -24,7 +24,7 @@ db.addReview = (userid, friendid, review) => {
     })
 }
 
-/**GET */
+/**READ */
 db.getMates = (userid) => {
     return new Promise ((res, rej) => {
         sql.query('SELECT * FROM mates WHERE userid=?', [userid] , (err, results) => {

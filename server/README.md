@@ -2,6 +2,7 @@
 ### Database: Local MySQL Setup
 ```
 CREATE DATABSE home8;
+
 CREATE TABLE `home8`.`users` (
   `userid` VARCHAR(45) NOT NULL,
   `username` VARCHAR(45) NULL,
@@ -14,6 +15,7 @@ CREATE TABLE `home8`.`users` (
   `genderPreference` VARCHAR(5) NULL,
   PRIMARY KEY (`userid`),
   UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE);
+
 CREATE TABLE `home8`.`listings` (
   `lid` INT NOT NULL,
   `description` VARCHAR(500) NULL,
@@ -45,7 +47,7 @@ CREATE TABLE `home8`.`listings` (
   `4` VARCHAR(20) NULL,
   `5` VARCHAR(20) NULL,
   PRIMARY KEY (`qid`));
-  
+
   CREATE TABLE `home8`.`personalityAs` (
   `aid` INT NOT NULL,
   `qid` INT NOT NULL,
@@ -53,6 +55,28 @@ CREATE TABLE `home8`.`listings` (
   `ans` INT NOT NULL,
   PRIMARY KEY (`aid`),
   FOREIGN KEY(`qid`) REFERENCES personalityQs(`qid`));
+
+  CREATE TABLE `home8`.`messages` (
+  `mid` INT NOT NULL,
+  `from` VARCHAR(45) NOT NULL,
+  `to` VARCHAR(45) NOT NULL,
+  `type` VARCHAR(45) NOT NULL,
+  `lid` INT NOT NULL,
+  `content` VARCHAR(500) NULL,
+  `time` DATETIME NOT NULL DEFAULT NOW(),
+  `read` TINYINT NOT NULL,
+  PRIMARY KEY (`mid`),
+  FOREIGN KEY(`lid`) REFERENCES listings(`lid`));
+
+  CREATE TABLE `home8`.`mates` (
+  `idmates` INT NOT NULL,
+  `userid` VARCHAR(45) NOT NULL,
+  `friendid` VARCHAR(45) NOT NULL,
+  `review` VARCHAR(500) NULL,
+  PRIMARY KEY (`idmates`),
+  FOREIGN KEY(`userid`) REFERENCES users(`userid`),
+  FOREIGN KEY (`friendid`) REFERENCES users(`userid`));
+
 ```
 ### Run
 ```
