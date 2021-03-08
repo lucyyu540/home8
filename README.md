@@ -6,7 +6,7 @@
 
 ### Database setup
 ```
-[MySQL setup instructions](server/README.md)
+[MySQL setup instructions](./server/README.md)
 ```
 
 ### Run back-end
