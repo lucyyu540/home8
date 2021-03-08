@@ -5,9 +5,7 @@
 ![Alt text](ex1.png?raw=true "ex1")
 
 ### Database setup
-```
-![MySQL setup instructions](https://github.com/lucyyu540/home8/blob/master/server/README.md)
-```
+[MySQL setup instructions](./server/README.md)
 
 ### Run back-end
 ```
