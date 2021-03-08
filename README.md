@@ -6,7 +6,7 @@
 
 ### Database setup
 ```
-[MySQL setup instructions](https://github.com/lucyyu540/home8/blob/master/server/README.md)
+![MySQL setup instructions](https://github.com/lucyyu540/home8/blob/master/server/README.md)
 ```
 
 ### Run back-end
