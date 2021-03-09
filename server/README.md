@@ -13,6 +13,7 @@ CREATE TABLE `home8`.`users` (
   `nationality` VARCHAR(20) NULL,
   `gender` VARCHAR(5) NULL,
   `genderPreference` VARCHAR(5) NULL,
+  `email` VARCHAR(45) NULL,
   PRIMARY KEY (`userid`),
   UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE);
 
@@ -76,6 +77,18 @@ CREATE TABLE `home8`.`listings` (
   PRIMARY KEY (`idmates`),
   FOREIGN KEY(`userid`) REFERENCES users(`userid`),
   FOREIGN KEY (`friendid`) REFERENCES users(`userid`));
+
+  CREATE TABLE `home8`.`filter` (
+  `idfilter` INT NOT NULL,
+  `current` TINYINT NOT NULL,
+  `past` TINYINT NOT NULL,
+  `lid` INT NOT NULL,
+  `userid` VARCHAR(45) NOT NULL,
+  `favorite` TINYINT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`idfilter`),
+  FOREIGN KEY (`lid`) REFERENCES listings(`lid`),
+  FOREIGN KEY (`userid`) REFERENCES users(`userid`));
+
 
 ```
 ### Run

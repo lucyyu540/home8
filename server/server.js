@@ -39,7 +39,7 @@ async function checkUsers(req, res, next) {
 	const userid = req.user.sub;
 	const username = req.user['https://home8-api.com/username'];
 	const email = req.user['https://home8-api.com/email'];
-	//console.log('in checkUsers middleware', userid, username, email);
+	console.log('in checkUsers middleware', userid, username, email);
 	try{
 		const user = await users.getUserByUserid(userid);
 		if (user) {
@@ -57,6 +57,7 @@ async function checkUsers(req, res, next) {
 	}
 	catch (err) {
 		console.log('(middleware) error')
+		console.log(err);
 		res.json(err);		
 	}
 }
