@@ -94,7 +94,7 @@ const { getTokenSilently, user, loading} = useAuth0();
       setUsername(responseData.username);
       setFirstName(responseData.firstName);
       setLastName(responseData.lastName);
-      setDob(responseData.dob.substring(0,responseData.dob.indexOf('T')));
+      setDob(responseData.dob);
       setPhone(responseData.phone)
       setCountry(responseData.nationality);
       setGender(responseData.gender);
@@ -139,15 +139,6 @@ const { getTokenSilently, user, loading} = useAuth0();
   useEffect( ()=> {
     if (user) getProfile();
   }, [user] )
-  console.log(username);
-  console.log(email);
-  console.log(firstName);
-  console.log(lastName);
-  console.log(phone);
-  console.log(dob);
-  console.log(country);
-  console.log(gender);
-  console.log(genderPreference);
 
   /**INPUT HANDLE FUNCTIONS */
   function handleNationalityChange(e) {

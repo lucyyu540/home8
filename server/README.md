@@ -11,8 +11,8 @@ CREATE TABLE `home8`.`users` (
   `dob` VARCHAR(45) NULL,
   `phone` VARCHAR(15) NULL,
   `nationality` VARCHAR(20) NULL,
-  `gender` VARCHAR(5) NULL,
-  `genderPreference` VARCHAR(5) NULL,
+  `gender` VARCHAR(20) NULL,
+  `genderPreference` VARCHAR(20) NULL,
   `email` VARCHAR(45) NULL,
   PRIMARY KEY (`userid`),
   UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE);

@@ -319,7 +319,7 @@ router.put('/my-profile', async (req, res) => {
 })
 router.put('/edit-profile', async (req, res) => {
     const userid = req.user.sub;
-    console.log('endpoint: private/edit-profile')
+    console.log('endpoint: private/edit-profile ' + userid);
     console.log(req.body);
     const firstName = req.body.firstName;
     const lastName = req.body.lastName;
@@ -331,9 +331,10 @@ router.put('/edit-profile', async (req, res) => {
     try {
         const results = await users.updateUserByUserid(firstName, lastName, dob, phone, nationality, gender, genderPreference, userid)
         console.log(results);
-        res.end();
+        res.json(results);
     }
     catch (err) {
+        console.log('update user error');
         res.json(err);
     }
 });
