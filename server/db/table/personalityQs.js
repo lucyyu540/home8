@@ -12,6 +12,17 @@ db.getQuestionByQid = (qid) => {
         });
     });
 }
+db.getQuestionForUser = (userid) => {
+    return new Promise((res, rej) => {
+        sql.query('SELECT q.one, q.two, q.three, q.four, q.five FROM personalityQs q '+
+        'LEFT JOIN personalityAs a ON a.qid != q.qid '+
+        'LIMIT 1', [userid],(err, results) => {
+            if (err) return rej(err);
+            if(results.length==0) return null
+            return res(results[0]);
+        });
+    });
+}
 
 db.addQuestion = (question, one, two, three, four, five) => {
     return new Promise ((res, rej) => {
@@ -24,9 +35,9 @@ db.addQuestion = (question, one, two, three, four, five) => {
 
 db.getSize = () => {
     return new Promise((res, rej) => {
-        sql.query('SELECT * FROM personalityQs', (err, results) => {
+        sql.query('SELECT count(*) as count FROM personalityQs', (err, results) => {
             if (err) return rej(err);
-            return res(results.length);
+            return res(results.count);
         });
     });
     

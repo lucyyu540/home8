@@ -42,11 +42,11 @@ CREATE TABLE `home8`.`listings` (
   CREATE TABLE `home8`.`personalityQs` (
   `qid` INT NOT NULL,
   `question` VARCHAR(200) NOT NULL,
-  `1` VARCHAR(20) NULL,
-  `2` VARCHAR(20) NULL,
-  `3` VARCHAR(20) NULL,
-  `4` VARCHAR(20) NULL,
-  `5` VARCHAR(20) NULL,
+  `one` VARCHAR(20) NULL,
+  `two` VARCHAR(20) NULL,
+  `three` VARCHAR(20) NULL,
+  `four` VARCHAR(20) NULL,
+  `five` VARCHAR(20) NULL,
   PRIMARY KEY (`qid`));
 
   CREATE TABLE `home8`.`personalityAs` (
@@ -65,7 +65,7 @@ CREATE TABLE `home8`.`listings` (
   `lid` INT NOT NULL,
   `content` VARCHAR(500) NULL,
   `time` DATETIME NOT NULL DEFAULT NOW(),
-  `read` TINYINT NOT NULL,
+  `read` TINYINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`mid`),
   FOREIGN KEY(`lid`) REFERENCES listings(`lid`));
 

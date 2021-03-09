@@ -1,19 +1,18 @@
 import React,{ useEffect } from 'react';
 
 import Paper from '@material-ui/core/Paper';
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import Grid from '@material-ui/core/Grid';
 
 import { makeStyles } from '@material-ui/core/styles';
-import { useAuth0, user } from "../react-auth0-spa";
+import { useAuth0} from "../react-auth0-spa";
 /**FORM */
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
 
 import { ResponsivePie } from '@nivo/pie'
 import Typography from '@material-ui/core/Typography';
@@ -23,7 +22,6 @@ import Typography from '@material-ui/core/Typography';
 import '../App.css'
 import { ListItemText, Divider } from '@material-ui/core';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
-import { red } from '@material-ui/core/colors';
 const useStyles = makeStyles((theme) => ({
     root: {
       flexGrow: 1,
@@ -160,19 +158,15 @@ export default function Personality(props) {
     }
     useEffect(() => {
       if (user) {
-        if (user.nickname === username) {
-          getQuestion();
-        }
-        else {
-          getComparison(username);
-        }
-
+        if (user.nickname === username) getQuestion();
+        else getComparison(username);
       }
     }, [user]);
     /**HANDLE FUNCTIONS */
     function handleChange(e) {
       setAns(e.target.value);
     }
+    /*QUESTION**********************************************/
     const pie = (data) => (
       <ResponsivePie
           data={data}
@@ -277,6 +271,7 @@ export default function Personality(props) {
 
       </div>
     );
+    /*COMPARISON**********************************************/
     const matchPie = (match) => (
       <ResponsivePie
           data={match}
@@ -339,9 +334,7 @@ export default function Personality(props) {
         <div className={classes.root}>
             <Paper className={classes.paper}>
                 {isAuthenticated && user.nickname === username && (
-                    <div>
-                      {displayQuestion()}
-                    </div>
+                    displayQuestion()
                   )}
                 {isAuthenticated && user.nickname != username&& (
                     displayComparison()

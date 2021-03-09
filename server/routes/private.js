@@ -340,27 +340,18 @@ router.put('/edit-profile', async (req, res) => {
 router.get('/get-question', async (req, res) => {
     console.log('endpoint /private/get-question')
     const userid = req.user.sub;
-    var result = 'before try';
     try {
-        const x = await personalityAs.getX(userid);
+        const result = await personalityQs.getQuestionForUser(userid);
         const n = await personalityQs.getSize();
-        if (x > n) {
-            result = {
-                qTemp: { question: 'Completed all questions! Please come back later.'},
-                x : x,
-                n: n,
-            }
-            console.log(result);
-            return res.json(result);
+        const x = await personalityAs.getSize(userid);
+        const data = {
+            qTemp : result,
+            n : n,
+            x : x
         }
-        const qTemp = await personalityQs.getQuestionByQid(x);
-        result = {
-            qTemp: qTemp,
-            x: x,
-            n: n
-        }
-        console.log(result);
-        res.json(result);
+        if (x >= n) result.qTemp = { question: 'Completed all questions! Please come back later.'}
+        console.log(data)
+        res.json(data);
     }
     catch (err) {
         console.log(err);
@@ -426,7 +417,7 @@ function euclideanDistance(arr) {
     maxDistance = Math.sqrt(maxDistance);
     if (maxDistance == 0) return 0;
     const frac = (distance/maxDistance);//closer to zero the more similar
-    return (1-frac)*100;
+    return ((1-frac)*100).toFixed(2);
 }
 
 module.exports = router;

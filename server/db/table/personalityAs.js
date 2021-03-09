@@ -20,6 +20,15 @@ db.getAnswersOfTwoUsers = (user1, user2) => {
         });
     });
 }
+db.getSize = (userid) => {
+    return new Promise((res, rej) => {
+        sql.query('SELECT count(*) as count FROM personalityAs group by ?', [userid], (err, results) => {
+            if (err) return rej(err);
+            return res(results.count);
+        });
+    });
+    
+}
 
 
 module.exports = db;

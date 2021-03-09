@@ -5,6 +5,7 @@ const users = require('../db/table/users');
 const listings = require('../db/table/listings');
 const matesDB = require('../db/table/mates');
 const personalityAs = require('../db/table/personalityAs');
+const private = require('./private')
 
 /**~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /**PUBLIC LISTTINGS BASED ON COORDINATES */
@@ -67,11 +68,10 @@ router.put('/:username', async (req, res) => {
     try {
         const results = await users.getProtectedUserByUsername(req.params.username);
         const reviews = await matesDB.getReviews(results.userid);
-        const thisAs = await personalityAs.getAnswersByUserid(results.userid);
         for (var i = 0; i< reviews.length; i++) {
-            const userAs = await personalityAs.getAnswersByUserid(reviews[i].userid);
+            const data = await personalityAs.getAnswersOfTwoUsers(results.userid, reviews[i].userid);
             const username = await users.getUsernameByUserid(reviews[i].userid);
-            reviews[i].score = (euclideanDistance(thisAs, userAs)).toFixed(2);
+            reviews[i].score = private.euclideanDistance(data);
             reviews[i].username = username;
         }
         results.reviews = reviews;
@@ -80,7 +80,6 @@ router.put('/:username', async (req, res) => {
     }
     catch (err) {
         console.log(err);
-        console.log('user DNE in mysql');
     }
 })
 /**GET INDIVIDUAL LISTING GIVEN LID */
@@ -124,19 +123,5 @@ router.get('/listing/:lid', async (req, res) => {
         res.json(err);
     }
 })
-function euclideanDistance(A, B) {
-    var sum = 0;
-    var maxDistance = 0;
-    //arr = [userid, x, qid1, ...]
-    for (var i = 1 ; i < Math.max(A.x,B.x); i ++) {
-        if (!A['qid'+i] || !B['qid'+i]) sum += 16;
-        else sum += Math.pow(A['qid'+i] - B['qid'+i], 2);//(a-b)^2
-        maxDistance += 16;//(5-1)^2
-    }
-    var distance = Math.sqrt(sum);
-    maxDistance = Math.sqrt(maxDistance);
-    if (maxDistance == 0) return 0;
-    const frac = (distance/maxDistance);//closer to zero the more similar
-    return (1-frac)*100;
-}
+
 module.exports = router;
